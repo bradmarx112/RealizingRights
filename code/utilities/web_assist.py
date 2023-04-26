@@ -5,6 +5,7 @@ from urllib.request import urlopen
 from retry import retry
 import re
 import warnings
+import Levenshtein as lev
 from typing import Union
 from bs4.element import NavigableString
 import logging
@@ -88,6 +89,30 @@ def format_dict_from_soup(tag: NavigableString, substring: str) -> dict:
     return content
 
 
+def closest_link_match(name, link_candidates) -> str:
+    '''
+    Calculate Levenshtein distance between one url and all urls in a list. Returns the url from the list
+    that has the smallest edit distance. If the smallest distance is greater than the threshold, no url is returned.
+    
+    params: 
+        name (String) : url that is incorrect
+        link_candidates (List) : list of urls that are known to be correct.
+        
+    returns: 
+        the correct url (as a string) with the smallest edit distance
+    '''
+    closest_link = None
+    clst_url_score = len(name) + 1
+    for option_tuple in link_candidates:
+        option = option_tuple[1]
+        similarity = lev.distance(name.lower(), option.lower())
+        if similarity < clst_url_score:
+            closest_link = option_tuple[0]
+            clst_url_score = similarity
+    
+    return closest_link
+
+
 # TODO: Make this function able to write dictionaries of any form/nesting to csv
 def write_to_csv(filename: str, data: dict, headers: Union[None, list]):
 
@@ -100,6 +125,19 @@ def write_to_csv(filename: str, data: dict, headers: Union[None, list]):
                 f.write("%s,%s\n" % (i, item))
 
 
+def get_search_results(chunk) -> list:
+    out_tuple_list = []
+    for qry_rslt in chunk:
+        url = qry_rslt.attrs['href']
+        link_desc = qry_rslt.text
+        if 'wikipedia' in url or '.com' in url or '.gov' in url:
+            continue
+        desc_cln = re.findall(r'[^\n]+', link_desc)[0]
+        out_tuple_list.append((url, desc_cln))
+    
+    return out_tuple_list
+
+
 if __name__ == '__main__':
     ct = make_context()
     test_sp = get_soup_from_html(qry='Alaska Gateway School District Southeast Fairbanks Census Area', ct=ct)
@@ -108,7 +146,10 @@ if __name__ == '__main__':
     for qry_rslt in chunk:
         url = qry_rslt.attrs['href']
         link_desc = qry_rslt.text
+        if 'wikipedia' in url or '.com' in url:
+            continue
         desc_cln = re.findall(r'[^\n]+', link_desc)[0]
         out_tuple_list.append((url, desc_cln))
+    best = closest_link_match(name='Alaska Gateway School District', link_candidates=out_tuple_list)
+
     print('done')
-    
