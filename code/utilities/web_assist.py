@@ -1,7 +1,10 @@
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
 import ssl
 import urllib.parse
-from urllib.request import urlopen
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import time
+from urllib.request import urlopen, Request
 from retry import retry
 import re
 import warnings
@@ -23,10 +26,23 @@ def make_context() -> ssl.SSLContext:
     return ctx
 
 
+def make_driver():
+    options = webdriver.ChromeOptions()
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--incognito')
+    options.add_argument('--headless')
+    driver = webdriver.Chrome("C:/Users/14102/Brown/Realizing_Rights/drivers/chromedriver", options=options)
+    return driver
+
 @retry(tries=5)
 def get_soup_from_html(qry: str, ct, prefix: str = 'https://search.brave.com/search?q=', timeout: float = 30):
-    formatted_url = prefix + urllib.parse.quote_plus(qry)
-    with urlopen(formatted_url, context=ct, timeout=timeout) as html:
+    formatted_url = qry # prefix + urllib.parse.quote_plus(qry)
+    headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
+    req = Request(url=formatted_url, headers=headers)
+    response = urlopen(req)
+    # soup = BeautifulSoup(response.text, 'html.parser')
+    with urlopen(req, context=ct, timeout=timeout) as html:
         page = html.read()
         soup = BeautifulSoup(page, "html.parser")
         return soup
@@ -122,7 +138,7 @@ def write_to_csv(filename: str, data: dict, headers: Union[None, list]):
             f.write(column_names)
         for i, r in data.items():
             for item in list(r):
-                f.write("%s,%s\n" % (i, item))
+                f.write("%s,%s\n" % (i, item)) 
 
 
 def get_search_results(chunk) -> list:
@@ -139,17 +155,17 @@ def get_search_results(chunk) -> list:
 
 
 if __name__ == '__main__':
-    ct = make_context()
-    test_sp = get_soup_from_html(qry='Alaska Gateway School District Southeast Fairbanks Census Area', ct=ct)
-    chunk = get_website_chunk_by_class(soup=test_sp, tag='a', classname='result-header')
+    drvr = make_driver()
+    drvr.get("https://www.bcps.org")
+    page_source = drvr.page_source
+    soup = BeautifulSoup(page_source, 'html.parser')
+    elems = drvr.find_elements(By.TAG_NAME, 'a')
+    elem_urls = [elem.get_attribute("href") for elem in elems]
+
+    chunk = get_website_chunk_by_class(soup=soup, tag='a')
     out_tuple_list = []
-    for qry_rslt in chunk:
-        url = qry_rslt.attrs['href']
-        link_desc = qry_rslt.text
-        if 'wikipedia' in url or '.com' in url:
-            continue
-        desc_cln = re.findall(r'[^\n]+', link_desc)[0]
-        out_tuple_list.append((url, desc_cln))
-    best = closest_link_match(name='Alaska Gateway School District', link_candidates=out_tuple_list)
+    for tag in elem_urls:
+        if 'vim' in tag:
+            out_tuple_list.append(tag)
 
     print('done')
