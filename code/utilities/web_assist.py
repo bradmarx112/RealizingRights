@@ -3,15 +3,22 @@ import ssl
 import urllib.parse
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import time
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from urllib.request import urlopen, Request
 from retry import retry
+import time
 import re
 import warnings
 import Levenshtein as lev
 from typing import Union
 from bs4.element import NavigableString
 import logging
+import os.path
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from url_scraper.link_data import LinkData
 
 
 __author__ = 'bmarx'
@@ -32,6 +39,7 @@ def make_driver():
     options.add_argument('--incognito')
     options.add_argument('--headless')
     driver = webdriver.Chrome("C:/Users/14102/Brown/Realizing_Rights/drivers/chromedriver", options=options)
+    driver.set_window_size(1600, 1600)
     return driver
 
 @retry(tries=5)
@@ -75,13 +83,32 @@ def prepend_root_to_url(base_url: str, prefix: str) -> str:
     return url
 
 
-def get_website_chunk_by_class(soup: BeautifulSoup, tag: str, classname: str = None):
-
-    if classname is None:
-        sect = soup.find_all(tag)
+def is_local_link(url: str, root_url: str) -> bool:
+    if url[0] == '/':
+        return True
+    if root_url in url:
+        return True
     else:
-        sect = soup.find_all(tag, class_=classname)
-    return sect
+        return False
+
+
+def is_external_link(url: str) -> bool:
+    if url.startswith('http'):
+        return True
+    else:
+        return False
+
+
+def try_getting_url_text(tag) -> str:
+    text = tag.text
+
+    if not text:
+        text = tag.string
+    if text:
+        text = text.replace("\n", "")
+
+    return text
+
 
 
 def format_dict_from_soup(tag: NavigableString, substring: str) -> dict:
@@ -107,15 +134,15 @@ def format_dict_from_soup(tag: NavigableString, substring: str) -> dict:
 
 def closest_link_match(name, link_candidates) -> str:
     '''
-    Calculate Levenshtein distance between one url and all urls in a list. Returns the url from the list
-    that has the smallest edit distance. If the smallest distance is greater than the threshold, no url is returned.
+    Calculate Levenshtein distance between one string and all strings in a list. Returns the string from the list
+    that has the smallest edit distance. If the smallest distance is greater than the threshold, no string is returned.
     
     params: 
-        name (String) : url that is incorrect
-        link_candidates (List) : list of urls that are known to be correct.
+        name (String) : initial string
+        link_candidates (List) : list of candidate strings
         
     returns: 
-        the correct url (as a string) with the smallest edit distance
+        the string with the smallest edit distance
     '''
     closest_link = None
     clst_url_score = len(name) + 1
@@ -154,18 +181,140 @@ def get_search_results(chunk) -> list:
     return out_tuple_list
 
 
+def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains):
+    hover_menus = drvr.find_elements(By.CSS_SELECTOR, "[aria-haspopup='true'][aria-expanded='false']")
+    menu_links = set()
+    # Loop through each <select> element and move the mouse to it to expand its options
+    for menu in hover_menus:
+        # Wait for the menu to become visible
+        
+        hover = actions.move_to_element(menu)
+        time.sleep(1)
+        try:
+            hover.perform()
+        except:
+            continue
+        # Get the HTML for the expanded options and parse it with BeautifulSoup
+        expanded_options_html = drvr.page_source
+        expanded_options_soup = BeautifulSoup(expanded_options_html, "html.parser")
+
+        # Find all <a> elements with an href attribute in the expanded options
+        expanded_links = expanded_options_soup.find_all("a", href=True)
+
+        # Add the expanded links to the links list
+        menu_links.update(expanded_links)
+    
+    return menu_links
+
+
+def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriver.Chrome, actions: ActionChains,
+                                            local_link_set: set = set(),
+                                            external_link_set: set = set(),
+                                            depth: int = 0):
+    drvr.get(url)
+    time.sleep(3)
+    if drvr.title.lower() == 'page not found':
+        return set(), set()
+
+    print(f'Depth {depth} for {url}')
+    soup = BeautifulSoup(drvr.page_source, 'html.parser')
+    # Find all Links on page
+    links = set(soup.find_all("a"))
+
+    # Find links in drop down menus. Assuming the menus appear on every page so only get them the first time
+    if depth == 0:
+        menu_links = iterate_through_menus(drvr=drvr, actions=actions)
+        links.update(menu_links)
+
+    # Compare new local links to old so we dont enter an infinite loop of links!
+    new_local_link_set = set()
+    for link in links:
+        try:
+            link_url = link.attrs['href']
+            link_url = prepend_root_to_url(link_url, base_url)
+        except:
+            continue
+        if 'login' in link_url.lower() or 'aspx' in link_url.lower():
+            continue
+
+        link_text = try_getting_url_text(link)
+        
+        if is_local_link(link_url, base_url):
+
+            
+            new_local_link_set.add(LinkData(link_text, link_url, depth=depth))
+        
+        elif is_external_link(link_url):
+            external_link_set.add(LinkData(link_text, link_url, depth=depth))
+        
+    new_links = new_local_link_set - local_link_set
+    local_link_set.update(new_local_link_set)
+
+    for link in new_links:
+        recursed_lcl_links, recursed_ext_links = recurse_scan_all_unique_links_in_site(url=link.link_url, 
+                                                                                        base_url=base_url,
+                                                                                        drvr=drvr, 
+                                                                                        actions=actions,
+                                                                                        local_link_set=local_link_set,
+                                                                                        external_link_set=external_link_set,
+                                                                                        depth=depth + 1)
+        local_link_set.update(recursed_lcl_links)
+        external_link_set.update(recursed_ext_links)
+    
+    return local_link_set, external_link_set
+
+
 if __name__ == '__main__':
     drvr = make_driver()
-    drvr.get("https://www.bcps.org")
-    page_source = drvr.page_source
-    soup = BeautifulSoup(page_source, 'html.parser')
-    elems = drvr.find_elements(By.TAG_NAME, 'a')
-    elem_urls = [elem.get_attribute("href") for elem in elems]
+    # base_url = "https://www.bcps.org"
+    # drvr.get(base_url)
+    # time.sleep(3)
+    # soup = BeautifulSoup(drvr.page_source, 'html.parser')
+    # elems = drvr.find_elements(By.TAG_NAME, 'a')
+    # elem_urls = [elem.get_attribute("href") for elem in elems]
+    actions = ActionChains(drvr)
+    start_url = 'https://www.adirondackcsd.org'
+    start_link_set = set()
+    start_link_set.add(LinkData(link_text='adirondackcsd', link_url=start_url, depth=0))
+    recursed_lcl_links, recursed_ext_links = recurse_scan_all_unique_links_in_site(url=start_url,
+                                                                                    base_url=start_url, 
+                                                                                    local_link_set=start_link_set,
+                                                                                    drvr=drvr, 
+                                                                                    actions=actions)
 
-    chunk = get_website_chunk_by_class(soup=soup, tag='a')
-    out_tuple_list = []
-    for tag in elem_urls:
-        if 'vim' in tag:
-            out_tuple_list.append(tag)
+    # Use the ActionChains class to simulate mouse actions
+    hover_menus = drvr.find_elements(By.CSS_SELECTOR, "[aria-haspopup='true'][aria-expanded='false']")
+    # Loop through each <select> element and move the mouse to it to expand its options
+    for menu in hover_menus:
+        # Wait for the menu to become visible
+        
+        hover = actions.move_to_element(menu)
+        time.sleep(1)
+        try:
+            hover.perform()
+        except:
+            continue
+        # Get the HTML for the expanded options and parse it with BeautifulSoup
+        expanded_options_html = drvr.page_source
+        expanded_options_soup = BeautifulSoup(expanded_options_html, "html.parser")
+
+        # Find all <a> elements with an href attribute in the expanded options
+        expanded_links = expanded_options_soup.find_all("a", href=True)
+
+        # Add the expanded links to the links list
+        links.update(expanded_links)
+
+    local_link_set = set()
+    external_link_set = set()
+    for link in links:
+        link_url = link.attrs['href']
+        link_text = try_getting_url_text(link)
+        if is_local_link(link_url, base_url):
+            link_url = prepend_root_to_url(link_url, base_url)
+            local_link_set.add(LinkData(link_text, link_url))
+        
+        elif is_external_link(link_url):
+            external_link_set.add(LinkData(link_text, link_url))
+
 
     print('done')
