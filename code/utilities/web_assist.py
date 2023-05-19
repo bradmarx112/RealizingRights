@@ -80,6 +80,9 @@ def prepend_root_to_url(base_url: str, prefix: str) -> str:
         url = prefix + base_url
     else:
         url = base_url
+
+    url, _, _ = url.partition('?')
+    url.removesuffix('/')
     return url
 
 
@@ -99,13 +102,14 @@ def is_external_link(url: str) -> bool:
         return False
 
 
-def try_getting_url_text(tag) -> str:
+def try_getting_url_text(tag):
     text = tag.text
 
     if not text:
         text = tag.string
     if text:
         text = text.replace("\n", "")
+        text = text.strip()
 
     return text
 
@@ -207,57 +211,75 @@ def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains):
     return menu_links
 
 
-def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriver.Chrome, actions: ActionChains,
+def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriver.Chrome, actions: ActionChains, wait,
                                             local_link_set: set = set(),
                                             external_link_set: set = set(),
-                                            depth: int = 0):
-    drvr.get(url)
-    time.sleep(3)
+                                            depth: int = 0,
+                                            blacklist_terms: list = []):
+    # First, try to get the web page.
+    try:
+        drvr.get(url)
+    except:
+        return set(), set()
+
+    # Give the page time to load
+    
+    # Wait for the page to be fully loaded
+    wait.until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
+
+    # Dont bother with '404 error' pages
     if drvr.title.lower() == 'page not found':
         return set(), set()
 
     print(f'Depth {depth} for {url}')
     soup = BeautifulSoup(drvr.page_source, 'html.parser')
     # Find all Links on page
-    links = set(soup.find_all("a"))
+    raw_links = set(soup.find_all("a"))
 
     # Find links in drop down menus. Assuming the menus appear on every page so only get them the first time
     if depth == 0:
         menu_links = iterate_through_menus(drvr=drvr, actions=actions)
-        links.update(menu_links)
+        raw_links.update(menu_links)
 
     # Compare new local links to old so we dont enter an infinite loop of links!
     new_local_link_set = set()
-    for link in links:
+    for raw_link in raw_links:
         try:
-            link_url = link.attrs['href']
+            # Only pick up links with valid URL structure
+            link_url = raw_link.attrs['href']
             link_url = prepend_root_to_url(link_url, base_url)
         except:
             continue
-        if 'login' in link_url.lower() or 'aspx' in link_url.lower():
-            continue
 
-        link_text = try_getting_url_text(link)
+        link_text = try_getting_url_text(raw_link)
         
+        # Add link to proper set
         if is_local_link(link_url, base_url):
-
-            
             new_local_link_set.add(LinkData(link_text, link_url, depth=depth))
         
         elif is_external_link(link_url):
             external_link_set.add(LinkData(link_text, link_url, depth=depth))
         
+    # Only pick up links that did not appear in any other page seen so far
     new_links = new_local_link_set - local_link_set
+    # Add those links to set of current links, but if they already exist do not overwrite previous instance
     local_link_set.update(new_local_link_set)
-
-    for link in new_links:
+    # Sort links to iterate over by 'depth' (How many sections between slashes there are)
+    new_links_sorted = sorted(list(new_links), key=lambda x: x.num_url_sections)
+    for link in new_links_sorted:
+        # Skip blacklisted terms 
+        if any([term in link.link_url.lower() for term in blacklist_terms]):
+            continue
+        # Recursion time
         recursed_lcl_links, recursed_ext_links = recurse_scan_all_unique_links_in_site(url=link.link_url, 
                                                                                         base_url=base_url,
                                                                                         drvr=drvr, 
                                                                                         actions=actions,
+                                                                                        wait=wait,
                                                                                         local_link_set=local_link_set,
                                                                                         external_link_set=external_link_set,
-                                                                                        depth=depth + 1)
+                                                                                        depth=depth + 1,
+                                                                                        blacklist_terms=blacklist_terms)
         local_link_set.update(recursed_lcl_links)
         external_link_set.update(recursed_ext_links)
     
@@ -266,55 +288,39 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
 
 if __name__ == '__main__':
     drvr = make_driver()
-    # base_url = "https://www.bcps.org"
-    # drvr.get(base_url)
-    # time.sleep(3)
-    # soup = BeautifulSoup(drvr.page_source, 'html.parser')
-    # elems = drvr.find_elements(By.TAG_NAME, 'a')
-    # elem_urls = [elem.get_attribute("href") for elem in elems]
+
     actions = ActionChains(drvr)
     start_url = 'https://www.adirondackcsd.org'
     start_link_set = set()
     start_link_set.add(LinkData(link_text='adirondackcsd', link_url=start_url, depth=0))
+    blacklist_terms = ['login', 'aspx', 'lightbox', 'file', '.php', '#', '.pdf', 'doc']
+    wait = WebDriverWait(drvr, 5)
+    # Get ALL Internal and External links in a website
     recursed_lcl_links, recursed_ext_links = recurse_scan_all_unique_links_in_site(url=start_url,
                                                                                     base_url=start_url, 
                                                                                     local_link_set=start_link_set,
                                                                                     drvr=drvr, 
-                                                                                    actions=actions)
+                                                                                    actions=actions,
+                                                                                    blacklist_terms=blacklist_terms,
+                                                                                    wait=wait)
 
-    # Use the ActionChains class to simulate mouse actions
-    hover_menus = drvr.find_elements(By.CSS_SELECTOR, "[aria-haspopup='true'][aria-expanded='false']")
-    # Loop through each <select> element and move the mouse to it to expand its options
-    for menu in hover_menus:
-        # Wait for the menu to become visible
+    # Identify External Links Pointing to social media sites 
+    social_media_sites = ['youtube', 'vimeo', 'facebook', 'twitter']
+    sites_identified = {}
+    ext_link_list = list(recursed_ext_links)
+    num_ext_links = len(ext_link_list)
+    ext_id = 0
+    while ext_id < num_ext_links:
+        ext_link = ext_link_list[ext_id]
+        scl_id = 0
+        while scl_id < len(social_media_sites):
+            if social_media_sites[scl_id] in ext_link.link_url:
+                sites_identified[social_media_sites.pop(scl_id)] = ext_link.depth_found
+            scl_id += 1
+
+        ext_id += 1
         
-        hover = actions.move_to_element(menu)
-        time.sleep(1)
-        try:
-            hover.perform()
-        except:
+        if len(social_media_sites) == 0:
             continue
-        # Get the HTML for the expanded options and parse it with BeautifulSoup
-        expanded_options_html = drvr.page_source
-        expanded_options_soup = BeautifulSoup(expanded_options_html, "html.parser")
-
-        # Find all <a> elements with an href attribute in the expanded options
-        expanded_links = expanded_options_soup.find_all("a", href=True)
-
-        # Add the expanded links to the links list
-        links.update(expanded_links)
-
-    local_link_set = set()
-    external_link_set = set()
-    for link in links:
-        link_url = link.attrs['href']
-        link_text = try_getting_url_text(link)
-        if is_local_link(link_url, base_url):
-            link_url = prepend_root_to_url(link_url, base_url)
-            local_link_set.add(LinkData(link_text, link_url))
-        
-        elif is_external_link(link_url):
-            external_link_set.add(LinkData(link_text, link_url))
-
 
     print('done')
