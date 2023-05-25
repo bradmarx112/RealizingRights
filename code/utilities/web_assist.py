@@ -12,6 +12,8 @@ import time
 import re
 import warnings
 import Levenshtein as lev
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 from typing import Union
 from bs4.element import NavigableString
 import logging
@@ -136,7 +138,7 @@ def format_dict_from_soup(tag: NavigableString, substring: str) -> dict:
     return content
 
 
-def closest_link_match(name, link_candidates) -> str:
+def closest_link_match(name, link_candidates) -> int:
     '''
     Calculate Levenshtein distance between one string and all strings in a list. Returns the string from the list
     that has the smallest edit distance. If the smallest distance is greater than the threshold, no string is returned.
@@ -148,16 +150,13 @@ def closest_link_match(name, link_candidates) -> str:
     returns: 
         the string with the smallest edit distance
     '''
-    closest_link = None
-    clst_url_score = len(name) + 1
-    for option_tuple in link_candidates:
-        option = option_tuple[1]
-        similarity = lev.distance(name.lower(), option.lower())
-        if similarity < clst_url_score:
-            closest_link = option_tuple[0]
+    clst_url_score = 0
+    for option in link_candidates:
+        similarity = fuzz.partial_token_sort_ratio(name.lower(), option.lower())
+        if similarity > clst_url_score:
             clst_url_score = similarity
     
-    return closest_link
+    return clst_url_score
 
 
 # TODO: Make this function able to write dictionaries of any form/nesting to csv
@@ -212,10 +211,15 @@ def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains):
 
 
 def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriver.Chrome, actions: ActionChains, wait,
+                                            link_keywords: list,
                                             local_link_set: set = set(),
                                             external_link_set: set = set(),
                                             depth: int = 0,
                                             blacklist_terms: list = []):
+
+    if depth + 1 > 5:
+        return local_link_set, external_link_set
+
     # First, try to get the web page.
     try:
         drvr.get(url)
@@ -223,7 +227,6 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
         return set(), set()
 
     # Give the page time to load
-    
     # Wait for the page to be fully loaded
     wait.until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
 
@@ -252,10 +255,16 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
             continue
 
         link_text = try_getting_url_text(raw_link)
+        if not link_text:
+            continue
         
+        if link_url == '':
+            continue
+
         # Add link to proper set
         if is_local_link(link_url, base_url):
-            new_local_link_set.add(LinkData(link_text, link_url, depth=depth))
+            if closest_link_match(name=link_text, link_candidates=link_keywords) > 80:
+                new_local_link_set.add(LinkData(link_text, link_url, depth=depth))
         
         elif is_external_link(link_url):
             external_link_set.add(LinkData(link_text, link_url, depth=depth))
@@ -266,6 +275,7 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
     local_link_set.update(new_local_link_set)
     # Sort links to iterate over by 'depth' (How many sections between slashes there are)
     new_links_sorted = sorted(list(new_links), key=lambda x: x.num_url_sections)
+        
     for link in new_links_sorted:
         # Skip blacklisted terms 
         if any([term in link.link_url.lower() for term in blacklist_terms]):
@@ -279,7 +289,8 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
                                                                                         local_link_set=local_link_set,
                                                                                         external_link_set=external_link_set,
                                                                                         depth=depth + 1,
-                                                                                        blacklist_terms=blacklist_terms)
+                                                                                        blacklist_terms=blacklist_terms,
+                                                                                        link_keywords=link_keywords)
         local_link_set.update(recursed_lcl_links)
         external_link_set.update(recursed_ext_links)
     
@@ -293,8 +304,10 @@ if __name__ == '__main__':
     start_url = 'https://www.adirondackcsd.org'
     start_link_set = set()
     start_link_set.add(LinkData(link_text='adirondackcsd', link_url=start_url, depth=0))
-    blacklist_terms = ['login', 'aspx', 'lightbox', 'file', '.php', '#', '.pdf', 'doc']
+    blacklist_terms = ['login', 'aspx', 'lightbox', 'file', '.php', '#', '.pdf', 'doc', 'jpg']
     wait = WebDriverWait(drvr, 5)
+    link_keywords = ['boe meeting', 'board meeting', 'board of education', 'calendar',
+                             'parent', 'meeting', 'video recording', 'board video recording', 'schedule']
     # Get ALL Internal and External links in a website
     recursed_lcl_links, recursed_ext_links = recurse_scan_all_unique_links_in_site(url=start_url,
                                                                                     base_url=start_url, 
@@ -302,10 +315,20 @@ if __name__ == '__main__':
                                                                                     drvr=drvr, 
                                                                                     actions=actions,
                                                                                     blacklist_terms=blacklist_terms,
-                                                                                    wait=wait)
+                                                                                    wait=wait,
+                                                                                    link_keywords=link_keywords)
 
     # Identify External Links Pointing to social media sites 
     social_media_sites = ['youtube', 'vimeo', 'facebook', 'twitter']
+    board_meeting_keywords = ['boe meeting', 'board meeting', 'boe recording', 'board recording',
+                              'boe meeting recording', 'board meeting recording', 'boe meeting video',
+                              'board meeting video', 'boe video recording', 'board video recording']
+
+    boe_similarity_scores = {}
+    for lcl_link in recursed_lcl_links:
+        boe_similarity_scores[lcl_link.link_url] = closest_link_match(lcl_link.link_text, board_meeting_keywords)
+
+    boe_similarity_scores = sorted(boe_similarity_scores.items(), key=lambda item: item[1], reverse=True)
     sites_identified = {}
     ext_link_list = list(recursed_ext_links)
     num_ext_links = len(ext_link_list)
@@ -321,6 +344,6 @@ if __name__ == '__main__':
         ext_id += 1
         
         if len(social_media_sites) == 0:
-            continue
+            break
 
     print('done')
