@@ -19,7 +19,11 @@ from bs4.element import NavigableString
 import logging
 import os.path
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+currentdir = os.path.dirname(os.path.realpath(__file__))
+parentdir = os.path.dirname(currentdir)
+gparentdir = os.path.dirname(parentdir)
+sys.path.append(parentdir)
+sys.path.append(gparentdir)
 from url_scraper.link_data import LinkData
 
 
@@ -28,21 +32,31 @@ __author__ = 'bmarx'
 logger = logging.getLogger(__name__)
 
 
-def make_context() -> ssl.SSLContext:
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-    return ctx
+def make_https(url) -> str:
+    try:
+        strt, prt, url = url.partition('://')
+        if url[-1] == '/':
+            url = url[:-1]
+    except:
+        return None
+
+    new_url = 'https' + prt + url
+
+    return new_url
 
 
-def make_driver():
+def make_driver_utils():
     options = webdriver.ChromeOptions()
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--incognito')
     options.add_argument('--headless')
-    driver = webdriver.Chrome("C:/Users/14102/Brown/Realizing_Rights/drivers/chromedriver", options=options)
+    options.add_argument("--disable-features=AutoplayIgnoreWebAudio")
+    driver = webdriver.Chrome("drivers/chromedriver.exe", options=options)
     driver.set_window_size(1600, 1600)
-    return driver
+    actions = ActionChains(driver)
+    wait = WebDriverWait(driver, 5)
+
+    return driver, actions, wait
 
 @retry(tries=5)
 def get_soup_from_html(qry: str, ct, prefix: str = 'https://search.brave.com/search?q=', timeout: float = 30):
@@ -84,20 +98,23 @@ def prepend_root_to_url(base_url: str, prefix: str) -> str:
         url = base_url
 
     url, _, _ = url.partition('?')
-    url.removesuffix('/')
+    url = make_https(url.removesuffix('/'))
+    if not url.startswith('https://www.'):
+        url = 'https://www.' + url.removeprefix('https://')
     return url
 
 
 def is_local_link(url: str, root_url: str) -> bool:
-    if url[0] == '/':
-        return True
     if root_url in url:
         return True
     else:
         return False
 
 
-def is_external_link(url: str) -> bool:
+def is_external_link(url: str, root_url: str) -> bool:
+    
+    if url.startswith(root_url):
+        return False
     if url.startswith('http'):
         return True
     else:
@@ -114,28 +131,6 @@ def try_getting_url_text(tag):
         text = text.strip()
 
     return text
-
-
-
-def format_dict_from_soup(tag: NavigableString, substring: str) -> dict:
-    content = {}
-    for span_vals in tag.find_all(class_=re.compile(substring)):
-        # add qty to dictionary. key is nutrient name
-
-        full_text = str(next(span_vals.stripped_strings))
-        stripped_text = full_text.replace(' ', '')
-
-        qty = re.findall(r'[0-9\.]+', stripped_text)
-        qty_value = qty[0]
-        try:
-            unit = re.findall(r'[^0-9\.]+', stripped_text)
-            unit_value = unit[0]
-        except:
-            unit_value = ''
-
-        content[span_vals.get('class')[0]] = [qty_value, unit_value]
-
-    return content
 
 
 def closest_link_match(name, link_candidates) -> int:
@@ -157,31 +152,6 @@ def closest_link_match(name, link_candidates) -> int:
             clst_url_score = similarity
     
     return clst_url_score
-
-
-# TODO: Make this function able to write dictionaries of any form/nesting to csv
-def write_to_csv(filename: str, data: dict, headers: Union[None, list]):
-
-    with open(filename, 'w') as f:
-        if headers is not None:
-            column_names = ','.join(headers) + '\n'
-            f.write(column_names)
-        for i, r in data.items():
-            for item in list(r):
-                f.write("%s,%s\n" % (i, item)) 
-
-
-def get_search_results(chunk) -> list:
-    out_tuple_list = []
-    for qry_rslt in chunk:
-        url = qry_rslt.attrs['href']
-        link_desc = qry_rslt.text
-        if 'wikipedia' in url or '.com' in url or '.gov' in url:
-            continue
-        desc_cln = re.findall(r'[^\n]+', link_desc)[0]
-        out_tuple_list.append((url, desc_cln))
-    
-    return out_tuple_list
 
 
 def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains):
@@ -217,9 +187,6 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
                                             depth: int = 0,
                                             blacklist_terms: list = []):
 
-    if depth + 1 > 5:
-        return local_link_set, external_link_set
-
     # First, try to get the web page.
     try:
         drvr.get(url)
@@ -250,24 +217,24 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
         try:
             # Only pick up links with valid URL structure
             link_url = raw_link.attrs['href']
+            # Skip blacklisted terms 
+            if any([term in link_url.lower() for term in blacklist_terms]):
+                continue
             link_url = prepend_root_to_url(link_url, base_url)
         except:
             continue
 
         link_text = try_getting_url_text(raw_link)
-        if not link_text:
-            continue
-        
-        if link_url == '':
-            continue
+
+        if is_external_link(link_url, base_url):
+            external_link_set.add(LinkData(link_text, link_url, depth=depth))
 
         # Add link to proper set
-        if is_local_link(link_url, base_url):
-            if closest_link_match(name=link_text, link_candidates=link_keywords) > 80:
+        elif is_local_link(link_url, base_url):
+            if not link_text:
+                continue
+            if closest_link_match(name=link_text, link_candidates=link_keywords) > 90:
                 new_local_link_set.add(LinkData(link_text, link_url, depth=depth))
-        
-        elif is_external_link(link_url):
-            external_link_set.add(LinkData(link_text, link_url, depth=depth))
         
     # Only pick up links that did not appear in any other page seen so far
     new_links = new_local_link_set - local_link_set
@@ -277,9 +244,7 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
     new_links_sorted = sorted(list(new_links), key=lambda x: x.num_url_sections)
         
     for link in new_links_sorted:
-        # Skip blacklisted terms 
-        if any([term in link.link_url.lower() for term in blacklist_terms]):
-            continue
+        
         # Recursion time
         recursed_lcl_links, recursed_ext_links = recurse_scan_all_unique_links_in_site(url=link.link_url, 
                                                                                         base_url=base_url,
@@ -298,16 +263,14 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
 
 
 if __name__ == '__main__':
-    drvr = make_driver()
+    drvr, actions, wait = make_driver_utils()
 
-    actions = ActionChains(drvr)
-    start_url = 'https://www.adirondackcsd.org'
+    start_url = 'https://www.asd5.org'
     start_link_set = set()
-    start_link_set.add(LinkData(link_text='adirondackcsd', link_url=start_url, depth=0))
-    blacklist_terms = ['login', 'aspx', 'lightbox', 'file', '.php', '#', '.pdf', 'doc', 'jpg']
-    wait = WebDriverWait(drvr, 5)
-    link_keywords = ['boe meeting', 'board meeting', 'board of education', 'calendar',
-                             'parent', 'meeting', 'video recording', 'board video recording', 'schedule']
+    start_link_set.add(LinkData(link_text='BASE', link_url=start_url, depth=0))
+    blacklist_terms = ['login', 'lightbox', 'file', '.php', '#', '.pdf', '.doc', '.jpg', 'tel:', 'blackboard']
+    link_keywords = ['boe meeting', 'board meeting', 'board of education', 'parent', 'school board',
+                 'meeting', 'video recording', 'board video recording', 'superintendent']
     # Get ALL Internal and External links in a website
     recursed_lcl_links, recursed_ext_links = recurse_scan_all_unique_links_in_site(url=start_url,
                                                                                     base_url=start_url, 
