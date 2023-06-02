@@ -90,17 +90,18 @@ def find_in_url(url: str,
     return target
 
 
-def prepend_root_to_url(base_url: str, prefix: str) -> str:
+def prepend_root_to_url(base_url: str, prefix: str, subdomain: str = 'www') -> str:
 
     if base_url[0] == '/':
         url = prefix + base_url
     else:
         url = base_url
 
-    url, _, _ = url.partition('?')
+    # url, _, _ = url.partition('?')
     url = make_https(url.removesuffix('/'))
-    if not url.startswith('https://www.'):
-        url = 'https://www.' + url.removeprefix('https://')
+    if not url.startswith(f'https://{subdomain}.') and len(get_url_components(url=url)) < 3:
+        url = f'https://{subdomain}.' + url.removeprefix('https://')
+
     return url
 
 
@@ -129,15 +130,34 @@ def try_getting_url_text(tag):
     if text:
         text = text.replace("\n", "")
         text = text.strip()
+        # Ignore link names that are too long
+        if len(text) > 50:
+            text = None
+        elif len(text) < 3:
+            text = None
 
     return text
 
 
+def get_subdomain(url: str) -> str:
+    url_components = get_url_components(url=url)
+    if len(url_components) >= 3: 
+        sdomain = url_components[0]
+    else:
+        sdomain = 'www'
+    
+    return sdomain
+
+
+def get_url_components(url: str) -> list:
+    url_root = find_in_url(url=url, item=1, cleanup=False)
+    url_comps = url_root.partition('.')
+
+    return url_comps
+
+
 def closest_link_match(name, link_candidates) -> int:
     '''
-    Calculate Levenshtein distance between one string and all strings in a list. Returns the string from the list
-    that has the smallest edit distance. If the smallest distance is greater than the threshold, no string is returned.
-    
     params: 
         name (String) : initial string
         link_candidates (List) : list of candidate strings
@@ -162,9 +182,10 @@ def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains):
         # Wait for the menu to become visible
         
         hover = actions.move_to_element(menu)
-        time.sleep(1)
         try:
             hover.perform()
+            hover.context_click(on_element=menu)
+            time.sleep(1)
         except:
             continue
         # Get the HTML for the expanded options and parse it with BeautifulSoup
@@ -185,7 +206,8 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
                                             local_link_set: set = set(),
                                             external_link_set: set = set(),
                                             depth: int = 0,
-                                            blacklist_terms: list = []):
+                                            blacklist_terms: list = [],
+                                            subdomain: str = 'www'):
 
     # First, try to get the web page.
     try:
@@ -196,7 +218,7 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
     # Give the page time to load
     # Wait for the page to be fully loaded
     wait.until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
-
+    
     # Dont bother with '404 error' pages
     if drvr.title.lower() == 'page not found':
         return set(), set()
@@ -206,8 +228,13 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
     # Find all Links on page
     raw_links = set(soup.find_all("a"))
 
-    # Find links in drop down menus. Assuming the menus appear on every page so only get them the first time
     if depth == 0:
+        # Accounting for redirects to other url names
+        subdomain = get_subdomain(url=drvr.current_url)
+        base_url = prepend_root_to_url(base_url=drvr.current_url, prefix='', subdomain=subdomain)
+        base_url = find_in_url(url=base_url, item=0, cleanup=False) + '//' + find_in_url(url=base_url, item=1, cleanup=False) 
+        url = base_url
+        # Find links in drop down menus. Assuming the menus appear on every page so only get them the first time
         menu_links = iterate_through_menus(drvr=drvr, actions=actions)
         raw_links.update(menu_links)
 
@@ -220,7 +247,7 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
             # Skip blacklisted terms 
             if any([term in link_url.lower() for term in blacklist_terms]):
                 continue
-            link_url = prepend_root_to_url(link_url, base_url)
+            link_url = prepend_root_to_url(link_url, base_url, subdomain=subdomain)
         except:
             continue
 
@@ -244,7 +271,6 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
     new_links_sorted = sorted(list(new_links), key=lambda x: x.num_url_sections)
         
     for link in new_links_sorted:
-        
         # Recursion time
         recursed_lcl_links, recursed_ext_links = recurse_scan_all_unique_links_in_site(url=link.link_url, 
                                                                                         base_url=base_url,
@@ -255,7 +281,8 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
                                                                                         external_link_set=external_link_set,
                                                                                         depth=depth + 1,
                                                                                         blacklist_terms=blacklist_terms,
-                                                                                        link_keywords=link_keywords)
+                                                                                        link_keywords=link_keywords,
+                                                                                        subdomain=subdomain)
         local_link_set.update(recursed_lcl_links)
         external_link_set.update(recursed_ext_links)
     
@@ -265,12 +292,12 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
 if __name__ == '__main__':
     drvr, actions, wait = make_driver_utils()
 
-    start_url = 'https://www.asd5.org'
+    start_url = 'https://www.dadeschools.net'
     start_link_set = set()
     start_link_set.add(LinkData(link_text='BASE', link_url=start_url, depth=0))
-    blacklist_terms = ['login', 'lightbox', 'file', '.php', '#', '.pdf', '.doc', '.jpg', 'tel:', 'blackboard']
-    link_keywords = ['boe meeting', 'board meeting', 'board of education', 'parent', 'school board',
-                 'meeting', 'video recording', 'board video recording', 'superintendent']
+    blacklist_terms = ['login', 'lightbox', 'file', '.php', '#', '.pdf', '.doc', '.jpg', 'tel:']
+    link_keywords = ['boe meeting', 'board meeting', 'board of education', 'parent', 'school board', 'board minutes',
+                 'meeting', 'video recording', 'board video recording', 'superintendent', 'document']
     # Get ALL Internal and External links in a website
     recursed_lcl_links, recursed_ext_links = recurse_scan_all_unique_links_in_site(url=start_url,
                                                                                     base_url=start_url, 
@@ -283,13 +310,28 @@ if __name__ == '__main__':
 
     # Identify External Links Pointing to social media sites 
     social_media_sites = ['youtube', 'vimeo', 'facebook', 'twitter']
-    board_meeting_keywords = ['boe meeting', 'board meeting', 'boe recording', 'board recording',
+    board_meeting_keywords = ['boe meeting', 'board meeting', 'boe recording', 'board recording', 'minutes'
                               'boe meeting recording', 'board meeting recording', 'boe meeting video',
                               'board meeting video', 'boe video recording', 'board video recording']
 
     boe_similarity_scores = {}
+    cur_sim = 60
+    best_link = None
     for lcl_link in recursed_lcl_links:
-        boe_similarity_scores[lcl_link.link_url] = closest_link_match(lcl_link.link_text, board_meeting_keywords)
+        sim = closest_link_match(lcl_link.link_text, board_meeting_keywords)
+        if sim > cur_sim:
+            best_link = lcl_link
+            cur_sim = sim
+
+    for ext_link in recursed_ext_links:
+        if ext_link.link_text:
+            sim = closest_link_match(ext_link.link_text, board_meeting_keywords)
+            if sim > cur_sim:
+                best_link = ext_link
+                cur_sim = sim
+
+    for lcl_link in recursed_lcl_links:
+        boe_similarity_scores[lcl_link.link_url] = [closest_link_match(lcl_link.link_text, board_meeting_keywords), lcl_link.link_text]
 
     boe_similarity_scores = sorted(boe_similarity_scores.items(), key=lambda item: item[1], reverse=True)
     sites_identified = {}
