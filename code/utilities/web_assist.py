@@ -19,13 +19,15 @@ from bs4.element import NavigableString
 import logging
 import os.path
 import sys
+
 currentdir = os.path.dirname(os.path.realpath(__file__))
 parentdir = os.path.dirname(currentdir)
 gparentdir = os.path.dirname(parentdir)
 sys.path.append(parentdir)
 sys.path.append(gparentdir)
-from url_scraper.link_data import LinkData
 
+from url_scraper.link_data import LinkData
+from objects.scrape_lists import blacklist_terms, link_keywords, board_meeting_keywords, social_media_sites
 
 __author__ = 'bmarx'
 
@@ -128,8 +130,8 @@ def try_getting_url_text(tag):
     if not text:
         text = tag.string
     if text:
-        text = text.replace("\n", "")
-        text = text.strip()
+        text = text.strip('\n\t ')
+        text = text.partition('\n')[0]
         # Ignore link names that are too long
         if len(text) > 50:
             text = None
@@ -223,7 +225,7 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
     if drvr.title.lower() == 'page not found':
         return set(), set()
 
-    print(f'Depth {depth} for {url}')
+    # print(f'Depth {depth} for {url}')
     soup = BeautifulSoup(drvr.page_source, 'html.parser')
     # Find all Links on page
     raw_links = set(soup.find_all("a"))
@@ -271,6 +273,7 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
     new_links_sorted = sorted(list(new_links), key=lambda x: x.num_url_sections)
         
     for link in new_links_sorted:
+        print(' '*(depth+1) + '|_' + str(depth) + ': ' + str(len(local_link_set)))
         # Recursion time
         recursed_lcl_links, recursed_ext_links = recurse_scan_all_unique_links_in_site(url=link.link_url, 
                                                                                         base_url=base_url,
@@ -285,19 +288,17 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
                                                                                         subdomain=subdomain)
         local_link_set.update(recursed_lcl_links)
         external_link_set.update(recursed_ext_links)
-    
+
     return local_link_set, external_link_set
 
 
 if __name__ == '__main__':
     drvr, actions, wait = make_driver_utils()
 
-    start_url = 'https://www.dadeschools.net'
+    start_url = 'https://www.ocps.net'
     start_link_set = set()
     start_link_set.add(LinkData(link_text='BASE', link_url=start_url, depth=0))
-    blacklist_terms = ['login', 'lightbox', 'file', '.php', '#', '.pdf', '.doc', '.jpg', 'tel:']
-    link_keywords = ['boe meeting', 'board meeting', 'board of education', 'parent', 'school board', 'board minutes',
-                 'meeting', 'video recording', 'board video recording', 'superintendent', 'document']
+
     # Get ALL Internal and External links in a website
     recursed_lcl_links, recursed_ext_links = recurse_scan_all_unique_links_in_site(url=start_url,
                                                                                     base_url=start_url, 
@@ -308,22 +309,18 @@ if __name__ == '__main__':
                                                                                     wait=wait,
                                                                                     link_keywords=link_keywords)
 
-    # Identify External Links Pointing to social media sites 
-    social_media_sites = ['youtube', 'vimeo', 'facebook', 'twitter']
-    board_meeting_keywords = ['boe meeting', 'board meeting', 'boe recording', 'board recording', 'minutes'
-                              'boe meeting recording', 'board meeting recording', 'boe meeting video',
-                              'board meeting video', 'boe video recording', 'board video recording']
-
     boe_similarity_scores = {}
     cur_sim = 60
     best_link = None
-    for lcl_link in recursed_lcl_links:
+    rll_str_sort = sorted(recursed_lcl_links, key=lambda x: len(x.link_text), reverse=True)
+    for lcl_link in rll_str_sort:
         sim = closest_link_match(lcl_link.link_text, board_meeting_keywords)
         if sim > cur_sim:
             best_link = lcl_link
             cur_sim = sim
 
-    for ext_link in recursed_ext_links:
+    rel_str_sort = sorted(recursed_lcl_links, key=lambda x: len(x.link_text), reverse=True)
+    for ext_link in rel_str_sort:
         if ext_link.link_text:
             sim = closest_link_match(ext_link.link_text, board_meeting_keywords)
             if sim > cur_sim:
@@ -334,6 +331,8 @@ if __name__ == '__main__':
         boe_similarity_scores[lcl_link.link_url] = [closest_link_match(lcl_link.link_text, board_meeting_keywords), lcl_link.link_text]
 
     boe_similarity_scores = sorted(boe_similarity_scores.items(), key=lambda item: item[1], reverse=True)
+
+    # Identify External Links Pointing to social media sites 
     sites_identified = {}
     ext_link_list = list(recursed_ext_links)
     num_ext_links = len(ext_link_list)
