@@ -1,21 +1,15 @@
-from bs4 import BeautifulSoup, SoupStrainer
-import ssl
-import urllib.parse
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from urllib.request import urlopen, Request
-from retry import retry
 import time
 import re
 import warnings
-import Levenshtein as lev
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
-from typing import Union
-from bs4.element import NavigableString
 import logging
 import os.path
 import sys
@@ -60,19 +54,6 @@ def make_driver_utils():
 
     return driver, actions, wait
 
-@retry(tries=5)
-def get_soup_from_html(qry: str, ct, prefix: str = 'https://search.brave.com/search?q=', timeout: float = 30):
-    formatted_url = qry # prefix + urllib.parse.quote_plus(qry)
-    headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
-    req = Request(url=formatted_url, headers=headers)
-    response = urlopen(req)
-    # soup = BeautifulSoup(response.text, 'html.parser')
-    with urlopen(req, context=ct, timeout=timeout) as html:
-        page = html.read()
-        soup = BeautifulSoup(page, "html.parser")
-        return soup
-
 
 def find_in_url(url: str,
                 item: int = -1,
@@ -93,13 +74,13 @@ def find_in_url(url: str,
 
 
 def prepend_root_to_url(base_url: str, prefix: str, subdomain: str = 'www') -> str:
-
+    # If URL only provides path to page without Root URL, add the root
     if base_url[0] == '/':
         url = prefix + base_url
     else:
         url = base_url
 
-    # url, _, _ = url.partition('?')
+    # Some URLs have a custom subdomain instead of 'www.' In these cases, dont add the 'www' to the start
     url = make_https(url.removesuffix('/'))
     if not url.startswith(f'https://{subdomain}.') and len(get_url_components(url=url)) < 3:
         url = f'https://{subdomain}.' + url.removeprefix('https://')
@@ -178,6 +159,8 @@ def closest_link_match(name, link_candidates) -> int:
 
 def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains):
     hover_menus = drvr.find_elements(By.CSS_SELECTOR, "[aria-haspopup='true'][aria-expanded='false']")
+    if not hover_menus:
+        hover_menus = drvr.find_elements(By.CSS_SELECTOR, "[aria-expanded='false']")
     menu_links = set()
     # Loop through each <select> element and move the mouse to it to expand its options
     for menu in hover_menus:
@@ -186,7 +169,7 @@ def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains):
         hover = actions.move_to_element(menu)
         try:
             hover.perform()
-            hover.context_click(on_element=menu)
+            hover.click(on_element=menu)
             time.sleep(1)
         except:
             continue
@@ -198,7 +181,7 @@ def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains):
         expanded_links = expanded_options_soup.find_all("a", href=True)
 
         # Add the expanded links to the links list
-        menu_links.update(expanded_links)
+        menu_links.update(set(expanded_links))
     
     return menu_links
 
