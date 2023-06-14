@@ -1,6 +1,161 @@
-,District ID,Board Meeting URL Text,Board Meeting URL Link,Board Meeting Link Depth,youtube,vimeo,facebook,twitter,Agency Name,State Name,State Abbr,Agency ID,NumSchools,LowGrade,HighGrade,NumStudents,URL
-0,622710.0,Board Meeting Agendas,https://boe.lausd.net/lausdbdmtgagendas,0,0,2,0,0,LOS ANGELES UNIFIED,California,CA ,622710.0,778.0,Kindergarten,12th Grade,435958.0,https://www.lausd.net
-1,1709930.0,,,,,,,,CITY OF CHICAGO SD 299,Illinois,IL ,1709930.0,646.0,Prekindergarten,12th Grade,329836.0,https://www.cps.k12.il.us
-2,1200390.0,,,,,,,,MIAMI-DADE,Florida,FL ,1200390.0,522.0,Prekindergarten,12th Grade,328589.0,https://www.dadeschools.net
-3,7200030.0,,,,,,0.0,0.0,PUERTO RICO DEPARTMENT OF EDUCATION,Puerto Rico,PR ,7200030.0,851.0,Prekindergarten,12th Grade,259535.0,https://www.de.pr.gov
-4,1200180.0,Board Meetings & Workshops,https://www.browardschools.com/boardmeetings,0,0,,0,0,BROWARD,Florida,FL ,1200180.0,332.0,Prekindergarten,12th Grade,256037.0,https://www.browardschools.com
+District ID,Board Meeting URL Text,Board Meeting URL Link,Board Meeting Link Depth,youtube,vimeo,facebook,twitter,Agency Name,State Name,State Abbr,Agency ID,NumSchools,LowGrade,HighGrade,NumStudents,URL
+1200390,,,,,,,,MIAMI-DADE,Florida,FL ,1200390,522,Prekindergarten,12th Grade,328589,https://www.dadeschools.net
+7200030,,,,,,0,0,PUERTO RICO DEPARTMENT OF EDUCATION,Puerto Rico,PR ,7200030,851,Prekindergarten,12th Grade,259535,https://www.de.pr.gov
+622710,Board Meeting Agendas,https://boe.lausd.net/lausdbdmtgagendas,0,0,2,0,0,LOS ANGELES UNIFIED,California,CA ,622710,778,Kindergarten,12th Grade,435958,https://www.lausd.net
+1709930,Join Meeting,https://meet.google.com/riy-odxs-xmx,1,0,,0,0,CITY OF CHICAGO SD 299,Illinois,IL ,1709930,646,Prekindergarten,12th Grade,329836,https://www.cps.edu
+1200180,Board Meetings & Workshops,https://www.browardschools.com/boardmeetings,0,0,,0,0,BROWARD,Florida,FL ,1200180,332,Prekindergarten,12th Grade,256037,https://www.browardschools.com
+1200870,,,,,,,,HILLSBOROUGH,Florida,FL ,1200870,304,Prekindergarten,12th Grade,224149,https://www.sdhc.k12.fl.us
+4823640,Board Meetings,https://www.houstonisd.org/domain/7947,0,0,,0,0,HOUSTON ISD,Texas,TX ,4823640,274,Prekindergarten,12th Grade,194607,https://www.houstonisd.org
+1201500,Board Meetings,https://www.palmbeachschools.org/domain/255,0,0,,0,0,PALM BEACH,Florida,FL ,1201500,235,Prekindergarten,12th Grade,187943,https://www.palmbeachschools.org
+5101260,School Board Regular Meeting and VHSL Recognitions,https://www.fcps.edu/event/school-board-regular-meeting-and-vhsl-recognitions,0,0,,0,0,FAIRFAX CO PBLC SCHS,Virginia,VA ,5101260,222,Prekindergarten,12th Grade,178479,https://www.fcps.edu
+1201440,School Board Meeting,https://www.ocps.net/cms/one.aspx?portalid=54703&pageid=87628&objectid.25895=1899059&contextid.25895=152781&parentid.25895=152782&localstartdate=2023-06-13t16:45&localenddate=2023-06-13t18:00&ref=mestp9fg96fvsgzpwyeoglf9k1nazjxk85y3dmbyrdo%3d,0,0,,0,0,ORANGE,Florida,FL ,1201440,274,Prekindergarten,12th Grade,203224,https://www.ocps.net
+1500030.0,,,,,,,,HAWAII DEPARTMENT OF EDUCATION,Hawaii,HI ,1500030.0,294.0,Prekindergarten,12th Grade,173178.0,https://www.hawaiipublicschools.org
+3702970.0,,,,,,,,CHARLOTTE-MECKLENBURG SCHOOLS,North Carolina,NC ,3702970.0,180.0,Prekindergarten,13th Grade,143244.0,https://www.wearecms.com
+2400510.0,Board,https://www.pgcps.org/offices/board-of-education,0,0,,0,0,PRINCE GEORGE'S COUNTY PUBLIC SCHOOLS,Maryland,MD ,2400510.0,206.0,Prekindergarten,12th Grade,128770.0,https://www.pgcps.org
+3704720.0,Types of School Board Meetings,https://www.wcpss.net/page/3726,1,0,,0,,WAKE COUNTY SCHOOLS,North Carolina,NC ,3704720.0,193.0,Prekindergarten,13th Grade,160099.0,https://www.wcpss.net
+2400480.0,Meeting Videos,https://www.montgomeryschoolsmd.org/boe/meetings/live.aspx,0,0,,0,0,MONTGOMERY COUNTY PUBLIC SCHOOLS,Maryland,MD ,2400480.0,209.0,Prekindergarten,12th Grade,158231.0,https://www.montgomeryschoolsmd.org
+4218990.0,,,,,,,,PHILADELPHIA CITY SD,Pennsylvania,PA ,4218990.0,218.0,Prekindergarten,12th Grade,118053.0,https://www.philasd.org
+4700148.0,Archived Board Meeting Audio,https://www.scsk12.org/board/?pn=51&pid=1610,1,0,,0,0,SHELBY COUNTY,Tennessee,TN ,4700148.0,222.0,Prekindergarten,12th Grade,105596.0,https://www.scsk12.org
+4816110.0,Board Meetings,https://www.cfisd.net/page/1513,0,0,2,0,0,CYPRESS-FAIRBANKS ISD,Texas,TX ,4816110.0,90.0,Prekindergarten,12th Grade,117217.0,https://www.cfisd.net
+4816230.0,Board Agendas & Meetings,https://www.dallasisd.org/domain/8679,0,0,,0,0,DALLAS ISD,Texas,TX ,4816230.0,237.0,Prekindergarten,12th Grade,143558.0,https://www.dallasisd.org
+1200480.0,Board Meeting Archived Notices,https://dcps.duvalschools.org/page/13851,1,1,0,0,0,DUVAL,Florida,FL ,1200480.0,205.0,Prekindergarten,12th Grade,128948.0,https://dcps.duvalschools.org
+4833120.0,Sign in,https://hac.nisd.net,1,0,1,0,0,NORTHSIDE ISD,Texas,TX ,4833120.0,124.0,Prekindergarten,12th Grade,102377.0,https://www.nisd.net
+1201590.0,Find School Board Meeting & Agendas,https://polkschoolsfl.com/meetings,0,0,,0,0,POLK,Florida,FL ,1201590.0,164.0,Prekindergarten,12th Grade,105422.0,https://www.polk-fl.net
+1201560.0,School Board Meeting Minutes,https://www.pcsb.org/page/3927,0,0,,0,0,PINELLAS,Florida,FL ,1201560.0,155.0,Prekindergarten,12th Grade,95446.0,https://www.pcsb.org
+2102990.0,Board of Education Business Meeting,https://www.jefferson.kyschools.us/calendar/event/board-education-business-meeting-29,0,0,,0,0,JEFFERSON COUNTY,Kentucky,KY ,2102990.0,170.0,Prekindergarten,12th Grade,94393.0,https://www.jefferson.kyschools.us
+5103130.0,,,,,,,,PRINCE WILLIAM CO PBLC SCHS,Virginia,VA ,5103130.0,97.0,Prekindergarten,12th Grade,90070.0,https://www.pwcs.edu
+2400120.0,Board Meeting Schedule 2023-2024,https://www.bcps.org/board_of_education/board_meeting_schedule_2023-2024,0,2,0,0,0,BALTIMORE COUNTY PUBLIC SCHOOLS,Maryland,MD ,2400120.0,177.0,Prekindergarten,12th Grade,111136.0,https://www.bcps.org
+803360.0,Videos,https://www.dpsk12.org/dps-videos,0,0,,0,0,SCHOOL DISTRICT NO. 1 IN THE COUNTY OF DENVER AND STATE OF C,Colorado,CO ,803360.0,206.0,Prekindergarten,12th Grade,88911.0,https://www.dpsk12.org
+1201080.0,Board Meetings,https://go.boarddocs.com/fl/lee/board.nsf/public,0,0,,0,0,LEE,Florida,FL ,1201080.0,118.0,Prekindergarten,12th Grade,97264.0,https://www.leeschools.net
+2400060.0,,,,,,,,ANNE ARUNDEL COUNTY PUBLIC SCHOOLS,Maryland,MD ,2400060.0,126.0,Prekindergarten,12th Grade,83163.0,https://www.aacps.org
+634320.0,Board Meetings,https://www.sandiegounified.org/a-to-_z_index/board_meetings,0,0,,0,0,SAN DIEGO UNIFIED,California,CA ,634320.0,176.0,Kindergarten,12th Grade,95233.0,https://www.sandi.net
+4900030.0,"AGENDAS, MINUTES, DOCUMENTS, & RECORDINGS",https://drive.google.com/drive/folders/1lbhgj4-d9hoawyqe-xrptriqvjkioli4,1,0,,0,0,ALPINE DISTRICT,Utah,UT ,4900030.0,92.0,Prekindergarten,12th Grade,86275.0,https://www.alpineschools.org
+4825170.0,Board,https://www.katyisd.org/domain/3847,0,0,,0,0,KATY ISD,Texas,TX ,4825170.0,74.0,Prekindergarten,12th Grade,88368.0,https://www.katyisd.org
+1201530.0,,,,,,,,PASCO,Florida,FL ,1201530.0,103.0,Prekindergarten,12th Grade,81157.0,https://www.pasco.k12.fl.us
+4819650.0,,,,,,,,FORT BEND ISD,Texas,TX ,4819650.0,86.0,Prekindergarten,12th Grade,77545.0,https://www.fortbend.k12.tx.us
+2400090.0,Learn more about Board meetings,https://www.baltimorecityschools.org/board-meetings,0,0,,0,0,BALTIMORE CITY PUBLIC SCHOOLS,Maryland,MD ,2400090.0,156.0,Prekindergarten,12th Grade,77807.0,https://www.baltimorecityschools.org
+5102250.0,,,,,,,,LOUDOUN CO PBLC SCHS,Virginia,VA ,5102250.0,98.0,Prekindergarten,12th Grade,81131.0,https://www.lcps.org
+4502310.0,Board Meeting LiveStream - 6/13/2023 – 6/13/2023,https://www.greenville.k12.sc.us/news/main.asp?titleid=2306board2,0,0,,0,0,GREENVILLE 01,South Carolina,SC ,4502310.0,92.0,Prekindergarten,12th Grade,76939.0,https://www.greenville.k12.sc.us
+4808940.0,,,,,,,,AUSTIN ISD,Texas,TX ,4808940.0,125.0,Prekindergarten,12th Grade,74602.0,https://www.austinisd.org
+4900210.0,,,,,,,,DAVIS DISTRICT,Utah,UT ,4900210.0,96.0,Prekindergarten,12th Grade,74486.0,https://vhs.davis.k12.ut.us
+4703180.0,Board Meetings,https://www.mnps.org/board-of-education/board-meetings,0,0,,0,0,DAVIDSON COUNTY,Tennessee,TN ,4703180.0,162.0,Prekindergarten,12th Grade,80381.0,https://www.mnps.org
+4819700.0,Read Board Meeting Agendas,https://www.fwisd.org/page/5407,0,0,1,0,0,FORT WORTH ISD,Texas,TX ,4819700.0,140.0,Prekindergarten,12th Grade,74850.0,https://www.fwisd.org
+1200150.0,Videos - Board Meetings,https://www.brevardschools.org/page/2305,0,1,,1,,BREVARD,Florida,FL ,1200150.0,111.0,Prekindergarten,12th Grade,72497.0,https://www.brevardschools.org
+3701920.0,,,,,,,,GUILFORD COUNTY SCHOOLS,North Carolina,NC ,3701920.0,127.0,Prekindergarten,13th Grade,69173.0,https://www.gcsnc.com
+1201470.0,Board Meeting Agendas and Resources (Archive),https://www.osceolaschools.net/domain/108,0,0,,0,0,OSCEOLA,Florida,FL ,1201470.0,85.0,Prekindergarten,12th Grade,72427.0,https://www.osceolaschools.net
+614550.0,Board Meeting Recaps,https://board.fresnounified.org/recaps,0,,0,0,0,FRESNO UNIFIED,California,CA ,614550.0,100.0,Kindergarten,12th Grade,69873.0,https://www.fresnounified.org
+622500.0,,,,,,,,LONG BEACH UNIFIED,California,CA ,622500.0,84.0,Kindergarten,12th Grade,67292.0,https://www.lbschools.net
+4815000.0,SSO,https://launchpad.classlink.com/conroeisd,0,0,,0,0,CONROE ISD,Texas,TX ,4815000.0,64.0,Prekindergarten,12th Grade,67761.0,https://www.conroeisd.net
+4800211.0,Board Meetings & Agenda,https://ideapublicschools.org/our-story/national-board-of-directors,0,,0,0,0,IDEA PUBLIC SCHOOLS,Texas,TX ,4800211.0,123.0,Prekindergarten,12th Grade,67988.0,https://www.ideapublicschools.org
+4820010.0,School Board Meeting,https://www.friscoisd.org/calendar/event-details/2023/11/14/frisco-isd-board-calendar/school-board-meeting,0,0,,0,0,FRISCO ISD,Texas,TX ,4820010.0,75.0,Prekindergarten,12th Grade,65825.0,https://www.friscoisd.org
+5103840.0,,,,,,,,VA BEACH CITY PBLC SCHS,Virginia,VA ,5103840.0,87.0,Prekindergarten,12th Grade,65450.0,https://www.vbschools.com
+5509600.0,Recordings of Board and Committee Meetings,https://mps.milwaukee.k12.wi.us/en/district/about-mps/school-board/office-of-board-governance/clerk-services/recordings-of-board-and-committee-meetings.htm,1,0,,0,0,MILWAUKEE SCHOOL DISTRICT,Wisconsin,WI ,5509600.0,156.0,Prekindergarten,12th Grade,69115.0,https://www.milwaukee.k12.wi.us
+1201710.0,TuesdayJuly 25School Board Meeting,https://www.scps.k12.fl.us/cms/one.aspx?portalid=1854109&pageid=1854129&objectid.65815=2653421&contextid.65815=1854173&parentid.65815=1854174&localstartdate=2023-07-25t17:30&localenddate=2023-07-25t19:30&ref=mestp9fg96fvsgzpwyeoghthsikmxrlerfmizqfl19e%3d,0,0,,0,0,SEMINOLE,Florida,FL ,1201710.0,78.0,Prekindergarten,12th Grade,66729.0,https://www.scps.k12.fl.us
+1201920.0,,,,,,,,VOLUSIA,Florida,FL ,1201920.0,90.0,Prekindergarten,12th Grade,62666.0,https://myvolusiaschools.org
+4900360.0,Board,https://www.graniteschools.org/board,0,0,,0,0,GRANITE DISTRICT,Utah,UT ,4900360.0,92.0,Prekindergarten,12th Grade,62544.0,https://www.graniteschools.org
+5100840.0,,,,,,,,CHESTERFIELD CO PBLC SCHS,Virginia,VA ,5100840.0,70.0,Prekindergarten,12th Grade,62445.0,https://www.mychesterfieldschools.com
+612330.0,,,,,,,,ELK GROVE UNIFIED,California,CA ,612330.0,66.0,Kindergarten,12th Grade,62229.0,https://www.egusd.net
+4807710.0,,,,,,,,ALDINE ISD,Texas,TX ,4807710.0,80.0,Prekindergarten,12th Grade,61633.0,https://www.aldineisd.org
+4702220.0,Watch Board Meetings,https://www.knoxschools.org/page/2112,0,0,2,0,0,KNOX COUNTY,Tennessee,TN ,4702220.0,94.0,Prekindergarten,12th Grade,60426.0,https://www.knoxschools.org
+804800.0,Board Meetings,https://www.jeffcopublicschools.org/about/board/board_meetings,0,0,,0,0,JEFFERSON COUNTY SCHOOL DISTRICT NO. R-1,Colorado,CO ,804800.0,164.0,Prekindergarten,12th Grade,76904.0,https://www.jeffcopublicschools.org
+803450.0,"Meetings, Agendas, and Minutes",https://www.dcsdk12.org/about/leadership/board_of_education/meetings_agendas_and_minutes,1,0,,0,0,DOUGLAS COUNTY SCHOOL DISTRICT NO. RE 1,Colorado,CO ,803450.0,90.0,Prekindergarten,12th Grade,63596.0,https://www.dcsdk12.org
+4808700.0,,,,0.0,,0.0,0.0,ARLINGTON ISD,Texas,TX ,4808700.0,77.0,Prekindergarten,12th Grade,56311.0,https://www.aisd.net
+2400420.0,Meetings,https://www.hcpss.org/board/meetings,1,,0,3,0,HOWARD COUNTY PUBLIC SCHOOLS,Maryland,MD ,2400420.0,77.0,Prekindergarten,12th Grade,57325.0,https://www.hcpss.org
+4832940.0,,,,,,,,NORTH EAST ISD,Texas,TX ,4832940.0,75.0,Prekindergarten,12th Grade,59830.0,https://www.neisd.net
+404970.0,,,,,,,,MESA UNIFIED DISTRICT (4235),Arizona,AZ ,404970.0,78.0,Prekindergarten,12th Grade,58859.0,https://www.mpsaz.org
+4900420.0,Board meetings,https://jordandistrict.org/board/meetings,0,0,,0,0,JORDAN DISTRICT,Utah,UT ,4900420.0,69.0,Prekindergarten,12th Grade,59363.0,https://www.jordandistrict.org
+802910.0,,,,,,,,CHERRY CREEK SCHOOL DISTRICT NO. 5 IN THE COUNTY OF ARAPAH,Colorado,CO ,802910.0,70.0,Prekindergarten,12th Grade,53587.0,https://www.cherrycreekschools.org
+3701500.0,,,,,,,,WINSTON SALEM / FORSYTH COUNTY SCHOOLS,North Carolina,NC ,3701500.0,81.0,Prekindergarten,12th Grade,52681.0,https://wsfcs.k12.nc.us
+1302220.0,Meeting Dates,https://www.forsyth.k12.ga.us/page/25,1,0,,0,0,FORSYTH COUNTY,Georgia,GA ,1302220.0,41.0,Prekindergarten,12th Grade,52757.0,https://www.forsyth.k12.ga.us
+1301230.0,,,,,,,,CLAYTON COUNTY,Georgia,GA ,1301230.0,66.0,Prekindergarten,12th Grade,52335.0,https://www.clayton.k12.ga.us
+102370.0,Board Meetings,https://simbli.eboardsolutions.com/sb_meetings/sb_meetinglisting.aspx?s=2077,1,0,,0,0,MOBILE COUNTY,Alabama,AL ,102370.0,92.0,Prekindergarten,12th Grade,52614.0,https://www.mcpss.com
+609850.0,,,,,,,,CORONA-NORCO UNIFIED,California,CA ,609850.0,53.0,Kindergarten,12th Grade,50889.0,https://www.cnusd.k12.ca.us
+4820340.0,Board Meetings,https://garlandisd.net/about/board-trustees/board-meetings,0,0,,0,0,GARLAND ISD,Texas,TX ,4820340.0,72.0,Prekindergarten,12th Grade,53674.0,https://www.garlandisd.net
+5101890.0,video),https://youtu.be/jkeylfwm3m0,1,0,,0,0,HENRICO CO PBLC SCHS,Virginia,VA ,5101890.0,81.0,Prekindergarten,12th Grade,49991.0,https://www.henricoschools.us
+1201230.0,School Board Meetings,https://www.manateeschools.net/page/11444,1,0,2,0,0,MANATEE,Florida,FL ,1201230.0,80.0,Prekindergarten,12th Grade,50248.0,https://www.manateeschools.net
+4818300.0,BOARD,https://www.episd.org/domain/211,0,0,1,0,0,EL PASO ISD,Texas,TX ,4818300.0,80.0,Prekindergarten,12th Grade,50769.0,https://www.episd.org
+4834320.0,,,,,,,,PASADENA ISD,Texas,TX ,4834320.0,67.0,Prekindergarten,12th Grade,49326.0,https://www.pasadenaisd.org
+5307710.0,Attend a School Board Meeting,https://www.seattleschools.org/about/school-board/meetings,0,,,0,0,SEATTLE SCHOOL DISTRICT NO. 1,Washington,WA ,5307710.0,109.0,Prekindergarten,12th Grade,51443.0,https://www.seattleschools.org
+4825740.0,Board Meetings,https://www.kleinisd.net/district/board_of_trustees/board_meeting_dates,0,,,0,0,KLEIN ISD,Texas,TX ,4825740.0,52.0,Prekindergarten,12th Grade,53294.0,https://www.kleinisd.net
+4835100.0,Board,https://www.pisd.edu/domain/10935,0,0,0,,0,PLANO ISD,Texas,TX ,4835100.0,79.0,Prekindergarten,12th Grade,49400.0,https://www.pisd.edu
+4827300.0,,,,,,,,LEWISVILLE ISD,Texas,TX ,4827300.0,64.0,Prekindergarten,12th Grade,49205.0,https://www.lisd.net
+4501440.0,Special Called Board Meeting,https://go.boarddocs.com/sc/charleston/board.nsf/goto?open&id=csqkf9512309,0,0,,0,0,CHARLESTON 01,South Carolina,SC ,4501440.0,82.0,Prekindergarten,12th Grade,49331.0,https://www.ccsdschools.com
+3700011.0,,,,,,,,CUMBERLAND COUNTY SCHOOLS,North Carolina,NC ,3700011.0,89.0,Prekindergarten,13th Grade,48860.0,https://www.ccs.k12.nc.us
+1100030.0,,,,,,,,DISTRICT OF COLUMBIA PUBLIC SCHOOLS,District of Columbia,DC ,1100030.0,116.0,Prekindergarten,12th Grade,48635.0,https://www.schoolwithinschool.org
+4703690.0,Board Meeting,https://www.rcschools.net/apps/events/2023/6/22/11343829/?rec_id=11343829&id=0,0,0,,0,0,RUTHERFORD COUNTY,Tennessee,TN ,4703690.0,51.0,Prekindergarten,12th Grade,49253.0,https://www.rcs.k12.tn.us
+2601103.0,,,,,,,,DETROIT PUBLIC SCHOOLS COMMUNITY DISTRICT,MICHIGAN,MI ,2601103.0,110.0,Prekindergarten,12th Grade,48536.0,https://www.detroitk12.org
+4840710.0,Meeting Minutes,https://www.sisd.net//www.sisd.net/page/702,0,0,,0,0,SOCORRO ISD,Texas,TX ,4840710.0,52.0,Prekindergarten,12th Grade,47278.0,https://www.sisd.net
+634410.0,Video Recording,https://youtu.be/-h6u7lcf20s,2,0,,0,0,SAN FRANCISCO UNIFIED,California,CA ,634410.0,113.0,Kindergarten,12th Grade,49204.0,https://www.sfusd.edu
+4823910.0,Board Meetings,https://www.humbleisd.net/domain/13004,0,0,,0,0,HUMBLE ISD,Texas,TX ,4823910.0,49.0,Prekindergarten,12th Grade,48112.0,https://www.humbleisd.net
+4838080.0,Board meetings and agendas,https://roundrockisd.org/about-rrisd/board-of-trustees/board-meetings,0,0,,0,,ROUND ROCK ISD,Texas,TX ,4838080.0,59.0,Prekindergarten,12th Grade,47167.0,https://www.roundrockisd.org
+2012990.0,BOE Meetings: Agendas and Minutes,https://www.usd259.org/page/7121,1,0,,0,0,WICHITA,Kansas,KS ,2012990.0,88.0,Prekindergarten,12th Grade,46657.0,https://www.usd259.org
+4502490.0,Board Meeting Schedule,https://www.horrycountyschools.net/page/74,2,0,,0,0,HORRY 01,South Carolina,SC ,4502490.0,57.0,Prekindergarten,12th Grade,46551.0,https://www.horrycountyschools.net
+2502790.0,Video,https://www.bostonpublicschools.org/domain/2507,0,0,,0,0,BOSTON,Massachusetts,MA ,2502790.0,113.0,Prekindergarten,12th Grade,46169.0,https://www.bostonpublicschools.org
+1201050.0,Board Meeting Agendas,https://www.lake.k12.fl.us/school-board/board-meetings,0,0,,0,0,LAKE,Florida,FL ,1201050.0,60.0,Prekindergarten,12th Grade,45845.0,https://www.lake.k12.fl.us
+634170.0,Board Meeting Calendar(opens in new window/tab),https://sbcusdcom.finalsite.com/fs/resource-manager/view/a57ea512-5b1d-4d02-95b3-a1e982ba8cd5,0,0,,0,0,SAN BERNARDINO CITY UNIFIED,California,CA ,634170.0,75.0,Kindergarten,12th Grade,46509.0,https://www.sbcusd.com
+3904380.0,Archived Meetings,https://www.youtube.com/@columbuscityschoolsboe8345/streams,0,0,,0,0,COLUMBUS CITY SCHOOL DISTRICT,Ohio,OH ,3904380.0,117.0,Prekindergarten,12th Grade,45547.0,https://www.ccsoh.us
+1201740.0,Regular School Board Meeting on 6/13,https://www.stjohns.k12.fl.us/news/sjcsb-meeting-on-6-13-2023,0,,,0,0,ST. JOHNS,Florida,FL ,1201740.0,54.0,Prekindergarten,12th Grade,48032.0,https://www.stjohns.k12.fl.us
+2400330.0,BOE Meeting,https://www.fcps.org/boe/calendar/3221994/boe-meeting,1,0,,0,0,FREDERICK COUNTY PUBLIC SCHOOLS,Maryland,MD ,2400330.0,69.0,Prekindergarten,12th Grade,45220.0,https://www.fcps.org
+4838730.0,,,,,,,,SAN ANTONIO ISD,Texas,TX ,4838730.0,100.0,Prekindergarten,12th Grade,44710.0,https://www.saisd.net
+1201680.0,Past Board Meetings and Workshops,https://www.youtube.com/playlist?list=plqm-l68fnvteeggk-nzjvjpywuygql7wa,1,0,,0,0,SARASOTA,Florida,FL ,1201680.0,62.0,Prekindergarten,12th Grade,43896.0,https://www.sarasotacountyschools.net
+4110040.0,Meetings,https://www.pps.net/page/1791,0,0,,0,0,PORTLAND SD 1J,Oregon,OR ,4110040.0,86.0,Prekindergarten,12th Grade,45171.0,https://www.pps.net
+401870.0,PTO Collaboration Meetings,https://www.cusd80.com/page/95679,1,0,,0,0,CHANDLER UNIFIED DISTRICT #80 (4242),Arizona,AZ ,401870.0,45.0,Prekindergarten,12th Grade,43923.0,https://www.cusd80.com
+1200330.0,Board Meetings,https://www.collierschools.com/domain/2001,0,0,,0,0,COLLIER,Florida,FL ,1200330.0,73.0,Prekindergarten,12th Grade,47617.0,https://www.collierschools.com
+1201770.0,Meeting Video Archive,https://www.youtube.com/playlist?list=pl3s7jdktsqelwbivtzwrng_khr6tgergh,0,0,,0,0,ST. LUCIE,Florida,FL ,1201770.0,52.0,Prekindergarten,12th Grade,43612.0,https://www.stlucieschools.org
+607440.0,,,,,,,,CAPISTRANO UNIFIED,California,CA ,607440.0,59.0,Kindergarten,12th Grade,42754.0,https://www.capousd.org
+200180.0,Board Meetings,https://www.asdk12.org/page/4329,0,0,,0,0,ANCHORAGE SCHOOL DISTRICT,Alaska,AK ,200180.0,97.0,Prekindergarten,12th Grade,43054.0,https://www.asdk12.org
+4825660.0,Previous Board Meeting Videos,https://www.killeenisd.org/page/15721,1,0,2,0,0,KILLEEN ISD,Texas,TX ,4825660.0,54.0,Prekindergarten,12th Grade,43882.0,https://www.killeenisd.org
+4701590.0,15JunBoard RoomBoard Meeting Quarterly Session,https://www.hcde.org/cms/one.aspx?portalid=350278&pageid=350294&objectid.38753=76148189&contextid.38753=350338&parentid.38753=350339&localstartdate=2023-06-15t16:30&localenddate=2023-06-15t17:30&ref=mestp9fg96fvsgzpwyeogmxsdjd7scyq9wsa5dhiote%3d,0,0,,0,0,HAMILTON COUNTY,Tennessee,TN ,4701590.0,79.0,Prekindergarten,12th Grade,45176.0,https://www.hcde.org
+619540.0,Board of Trustees - Regular Meeting,https://www.kernhigh.org/apps/events/2023/9/5/11423174/?rec_id=11423174&id=0,0,0,,,0,KERN HIGH,California,CA ,619540.0,24.0,9th Grade,12th Grade,42863.0,https://www.kernhigh.org
+1201260.0,,,,,,,,MARION,Florida,FL ,1201260.0,61.0,Prekindergarten,12th Grade,42678.0,https://www.marion.k12.fl.us
+635310.0,,,,,,,,SANTA ANA UNIFIED,California,CA ,635310.0,52.0,Kindergarten,12th Grade,41835.0,https://www.sausd.k12.ca.us
+4704530.0,"April 17, 2023 School Board Meeting Agenda",https://meeting.boeconnect.net/public/agenda/566?meeting=578943,1,0,,0,0,WILLIAMSON COUNTY,Tennessee,TN ,4704530.0,51.0,Prekindergarten,12th Grade,41954.0,https://www.wcs.edu
+4827030.0,Read more,https://news.leanderisd.org/announcing-shelley-roberts-as-tarvin-elementary-school-principal,0,0,,0,0,LEANDER ISD,Texas,TX ,4827030.0,46.0,Prekindergarten,12th Grade,41780.0,https://www.leanderisd.org
+408800.0,Meetings,https://govboard.tusd1.org/meetings,0,0,,0,0,TUCSON UNIFIED DISTRICT (4403),Arizona,AZ ,408800.0,90.0,Prekindergarten,12th Grade,42002.0,https://www.tusd1.org
+2101860.0,,,,,,,,FAYETTE COUNTY,Kentucky,KY ,2101860.0,80.0,Prekindergarten,12th Grade,41415.0,https://www.fcps.net
+609030.0,Board Meetings & Archives,https://www.cusd.com/boardmeetingsagendasarchives.aspx,0,0,0,0,0,CLOVIS UNIFIED,California,CA ,609030.0,49.0,Kindergarten,12th Grade,42699.0,https://www.cusd.com
+3411340.0,,,,,,,,NEWARK PUBLIC SCHOOL DISTRICT,New Jersey,NJ ,3411340.0,65.0,Prekindergarten,12th Grade,40876.0,https://www.nps.k12.nj.us
+4814280.0,,,,0.0,0.0,0.0,0.0,CLEAR CREEK ISD,Texas,TX ,4814280.0,46.0,Prekindergarten,12th Grade,40832.0,https://www.ccisd.net
+4807830.0,Video Alief,https://video.aliefisd.net,0,0,,0,0,ALIEF ISD,Texas,TX ,4807830.0,46.0,Prekindergarten,12th Grade,40664.0,https://www.aliefisd.net
+633150.0,,,,,,,,RIVERSIDE UNIFIED,California,CA ,633150.0,49.0,Kindergarten,12th Grade,39626.0,https://www.rusd.k12.ca.us
+3704620.0,,,,,,,,UNION COUNTY PUBLIC SCHOOLS,North Carolina,NC ,3704620.0,52.0,Prekindergarten,13th Grade,40600.0,https://www.ucps.k12.nc.us
+5100810.0,,,,,,,,CHESAPEAKE CITY PBLC SCHS,Virginia,VA ,5100810.0,48.0,Prekindergarten,12th Grade,40458.0,https://www.cpschools.com
+4110820.0,School Board Meetings Archive,https://salkeiz.k12.or.us/schoolboard/school-board-archives,0,0,1,0,0,SALEM-KEIZER SD 24J,Oregon,OR ,4110820.0,65.0,Prekindergarten,12th Grade,39507.0,https://www.salkeiz.k12.or.us
+4826580.0,Online Board,https://pol.tasb.org/home/index/481,1,0,,0,0,LAMAR CISD,Texas,TX ,4826580.0,44.0,Prekindergarten,12th Grade,39579.0,https://www.lcisd.org
+4843650.0,Word,https://links.psqr.io/3tug88m,3,0,,0,0,UNITED ISD,Texas,TX ,4843650.0,50.0,Prekindergarten,12th Grade,39316.0,https://www.uisd.net
+1200300.0,,,,,,,,CLAY,Florida,FL ,1200300.0,51.0,Prekindergarten,12th Grade,38593.0,https://oneclay.net
+614880.0,,,,,,,,GARDEN GROVE UNIFIED,California,CA ,614880.0,66.0,Kindergarten,12th Grade,38560.0,https://www.ggusd.us
+4830390.0,Service Record Request (opens in new window/tab),https://docs.google.com/forms/d/1oeketyvlh_z90lzx9tollnitmtiwxkszy3_nhdcrndi/viewform?edit_requested=true,0,0,,0,0,MESQUITE ISD,Texas,TX ,4830390.0,50.0,Prekindergarten,12th Grade,38378.0,https://www.mesquiteisd.org
+4811680.0,Board Meetings and Agendas,https://www.bisd.us/about/board-meetings-and-agendas,0,0,,0,0,BROWNSVILLE ISD,Texas,TX ,4811680.0,56.0,Prekindergarten,12th Grade,38448.0,https://www.bisd.us
+634620.0,Board Meeting Recordings,https://www.sanjuan.edu/page/46150,1,0,,0,0,SAN JUAN UNIFIED,California,CA ,634620.0,68.0,Kindergarten,12th Grade,38289.0,https://www.sanjuan.edu
+802340.0,boe.aurorak12.org/meetings,https://boe.aurorak12.org/meetings,1,0,,0,0,AURORA JOINT DISTRICT NO. 28 OF THE COUNTIES OF ADAMS AND A,Colorado,CO ,802340.0,62.0,Prekindergarten,12th Grade,38451.0,https://aurorak12.org
+2703180.0,School Board,https://www.ahschools.us/domain/82,0,0,,0,0,ANOKA-HENNEPIN PUBLIC SCHOOL DIST.,Minnesota,MN ,2703180.0,52.0,Prekindergarten,12th Grade,38230.0,https://www.ahschools.us
+1200510.0,,,,,,,,ESCAMBIA,Florida,FL ,1200510.0,69.0,Prekindergarten,12th Grade,37804.0,https://www.ecsd-fl.schoolloop.com
+2400390.0,Board Meetings Video Archive,https://www.hcps.org/boe/livestream,2,0,,,0,HARFORD COUNTY PUBLIC SCHOOLS,Maryland,MD ,2400390.0,55.0,Prekindergarten,12th Grade,37920.0,https://www.hcps.org
+4703030.0,View,https://www.instagram.com/reel/cs_eunxpqo5,0,0,,0,0,MONTGOMERY COUNTY,Tennessee,TN ,4703030.0,42.0,Prekindergarten,12th Grade,37680.0,https://www.cmcss.net
+3702370.0,Minutes,https://www.johnston.k12.nc.us/page/3143,2,0,0,0,0,JOHNSTON COUNTY PUBLIC SCHOOLS,North Carolina,NC ,3702370.0,48.0,Prekindergarten,13th Grade,37823.0,https://www.johnston.k12.nc.us
+4837020.0,Watch the RISD Board of Trustees Meeting,https://richardsonisdtx.v3.swagit.com/views/404,0,0,,0,0,RICHARDSON ISD,Texas,TX ,4837020.0,55.0,Prekindergarten,12th Grade,37633.0,https://www.risd.org
+4901140.0,BOARD,https://procedure.washk12.org/forms/000/050,1,0,,0,0,WASHINGTON DISTRICT,Utah,UT ,4901140.0,55.0,Prekindergarten,12th Grade,37400.0,https://www.washk12.org
+4846680.0,Blackboard Inc.,https://www.blackboard.com,0,0,,0,0,YSLETA ISD,Texas,TX ,4846680.0,57.0,Prekindergarten,12th Grade,37244.0,https://www.yisd.net
+4101920.0,Upcoming School Board Meetings,https://www.beaverton.k12.or.us/school-board/calendar,0,0,,0,0,BEAVERTON SD 48J,Oregon,OR ,4101920.0,56.0,Prekindergarten,12th Grade,39253.0,https://beaverton.k12.or.us
+406250.0,Watch a Board Meeting,https://www.peoriaunified.org/site/default.aspx?pageid=122,0,0,,0,,PEORIA UNIFIED SCHOOL DISTRICT (4237),Arizona,AZ ,406250.0,44.0,Prekindergarten,12th Grade,36741.0,https://www.peoriaunified.org
+638640.0,View school board meeting agendas,https://sweetwaterschools.novusagenda.com/agendapublic,0,0,,0,0,SWEETWATER UNION HIGH,California,CA ,638640.0,29.0,Kindergarten,12th Grade,36557.0,https://www.sweetwaterschools.org
+4900630.0,,,,,,,,NEBO DISTRICT,Utah,UT ,4900630.0,48.0,Prekindergarten,12th Grade,36229.0,https://www.nebo.edu
+684500.0,,,,,,,,IRVINE UNIFIED,California,CA ,684500.0,44.0,Kindergarten,12th Grade,36083.0,https://www.iusd.org
+806900.0,,,,,,,,ADAMS 12 FIVE STAR SCHOOLS,Colorado,CO ,806900.0,54.0,Prekindergarten,12th Grade,36078.0,https://www.adams12.org
+4501170.0,Board Meeting Photos,https://www.bcsdschools.net/domain/6060,0,0,,0,0,BERKELEY 01,South Carolina,SC ,4501170.0,46.0,Prekindergarten,12th Grade,37074.0,https://www.bcsdschools.net
+633840.0,Speaking at Board Meetings,https://www.scusd.edu/pod/speaking-board-meetings,1,0,,0,0,SACRAMENTO CITY UNIFIED,California,CA ,633840.0,73.0,Kindergarten,12th Grade,39711.0,https://www.scusd.edu
+638010.0,Board Meeting Recordings,https://www.stocktonusd.net/page/16749,1,0,,0,,STOCKTON UNIFIED,California,CA ,638010.0,55.0,Kindergarten,12th Grade,36202.0,https://www.stocktonusd.net
+101920.0,,,,,,,,JEFFERSON COUNTY,Alabama,AL ,101920.0,57.0,Prekindergarten,12th Grade,35819.0,https://www.jefcoed.com
+3904375.0,Board Meeting Minutes,https://www.cps-k12.org/page/577,1,2,,0,0,CINCINNATI PUBLIC SCHOOLS,Ohio,OH ,3904375.0,65.0,Prekindergarten,12th Grade,35820.0,https://www.cps-k12.org
+1713710.0,Board Meeting Minutes 2018-2019,https://www.u-46.org/page/9290,1,0,,0,0,SD U-46,Illinois,IL ,1713710.0,58.0,Prekindergarten,12th Grade,35864.0,https://www.u-46.org
+3904378.0,,,,,,,,CLEVELAND MUNICIPAL,Ohio,OH ,3904378.0,96.0,Prekindergarten,12th Grade,35319.0,https://clevelandmetroschools.org
+631530.0,,,,,,,,POWAY UNIFIED,California,CA ,631530.0,38.0,Kindergarten,12th Grade,35192.0,https://www.powayusd.com
+613920.0,,,,,,,,FONTANA UNIFIED,California,CA ,613920.0,44.0,Kindergarten,12th Grade,35101.0,https://www.fusd.net
+4825260.0,"August 23, 2021 | Regular Board Meeting",https://www.youtube.com/watch?v=lgjpr2zkmb0,1,0,,0,0,KELLER ISD,Texas,TX ,4825260.0,42.0,Prekindergarten,12th Grade,34813.0,https://www.kellerisd.net
+628050.0,Watch Meetings Live,https://www.ousd.org/domain/5132,0,0,,0,0,OAKLAND UNIFIED,California,CA ,628050.0,84.0,Kindergarten,12th Grade,34428.0,https://www.ousd.org
+4900142.0,,,,,,,,CANYONS DISTRICT,Utah,UT ,4900142.0,52.0,Prekindergarten,12th Grade,33702.0,https://www.canyonsdistrict.org
+3700530.0,Archived BOE Meeting Minutes,https://www.cabarrus.k12.nc.us/page/4893,1,0,,0,0,CABARRUS COUNTY SCHOOLS,North Carolina,NC ,3700530.0,42.0,Prekindergarten,13th Grade,33562.0,https://www.cabarrus.k12.nc.us
+403400.0,Videos,https://www.gilbertschools.net/@gilbertpublicschools6525/videos?view=0&sort=dd&shelf_id=0,1,1,,0,0,GILBERT UNIFIED DISTRICT (4239),Arizona,AZ ,403400.0,38.0,Prekindergarten,12th Grade,33775.0,https://www.gilbertschools.net
+4828920.0,visit the Board Meetings & Agendas webpage,https://www.mansfieldisd.org/fs/pages/1780,0,0,2,0,0,MANSFIELD ISD,Texas,TX ,4828920.0,48.0,Prekindergarten,12th Grade,35559.0,https://www.mansfieldisd.org
+614400.0,Meeting Minutes,https://www.fremont.k12.ca.us/pf4/cms2/view_page?d=x&group_id=1531973518590&vdid=i17aa6293109qv,0,0,1,0,0,FREMONT UNIFIED,California,CA ,614400.0,43.0,Kindergarten,12th Grade,33873.0,https://www.fremont.k12.ca.us

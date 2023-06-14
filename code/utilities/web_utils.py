@@ -208,7 +208,7 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
     if drvr.title.lower() == 'page not found':
         return set(), set()
 
-    # print(f'Depth {depth} for {url}')
+    print(f'Depth {depth} for {url}')
     soup = BeautifulSoup(drvr.page_source, 'html.parser')
     # Find all Links on page
     raw_links = set(soup.find_all("a"))
@@ -278,7 +278,7 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
 if __name__ == '__main__':
     drvr, actions, wait = make_driver_utils()
 
-    start_url = 'https://www.ocps.net'
+    start_url = 'https://www.fusd.net'
     start_link_set = set()
     start_link_set.add(LinkData(link_text='BASE', link_url=start_url, depth=0))
 

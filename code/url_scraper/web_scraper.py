@@ -1,10 +1,9 @@
-from concurrent.futures.thread import ThreadPoolExecutor
-import queue
-
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 
+import queue
 import os.path
 import sys
 import pandas as pd
@@ -31,7 +30,8 @@ logger = logging.getLogger(__name__)
 class DistrictWebsiteScraper:
 
     def __init__(self,
-                 school_district_info_df: pd.DataFrame,
+                 url: str,
+                 agency_id: str,
                  site_link_relevance_cutoff: int = 90,
                  boe_link_similarity_cutoff: int = 60,
                  blacklist_terms: list = blacklist_terms, 
@@ -42,7 +42,8 @@ class DistrictWebsiteScraper:
                  ):
 
         # Dataframe with District URLs and other info
-        self.district_info_df = school_district_info_df
+        self.url = url
+        self.agency_id = agency_id
 
         # Integer cutoffs for string similarity scoring
         self.site_link_relevance_cutoff = site_link_relevance_cutoff
@@ -56,73 +57,67 @@ class DistrictWebsiteScraper:
 
         # Utilities for Selenium driver
         self.drvr, self.actions, self.wait = make_driver_utils()
+        self.drvr.set_page_load_timeout(15)
         self.verbose = verbose
 
         self.url_data = {}
 
 
-    def find_board_meeting_and_social_media_links(self, max_iters=None) -> None:
+    def find_board_meeting_and_social_media_links(self) -> None:
 
-        target_district_df = self.district_info_df[:max_iters]
+        start_link_set = set()
+        dist_info = []
+        start_link_set.add(LinkData(link_text='BASE', link_url=self.url, depth=0))
+        recursed_lcl_links, recursed_ext_links = set(), set()
+        recursed_lcl_links, recursed_ext_links = self._recurse_scan_all_unique_links_in_site(url=self.url,
+                                                                                        base_url=self.url, 
+                                                                                        local_link_set=start_link_set,
+                                                                                        external_link_set=set())
 
-        logger.info(msg=f'Begin processing of {target_district_df.shape[0]} district websites')
+        cur_sim = self.boe_link_similarity_cutoff
+        best_link = None
+        all_links = recursed_lcl_links
+        all_links.update(recursed_ext_links)
+        all_links_sorted = sorted(list(all_links), key=lambda x: x.depth_found)
+        ext_links_sorted = sorted(list(recursed_ext_links), key=lambda x: x.depth_found)
 
-        for _, row in target_district_df.iterrows():
+        # look for the most likely board meeting link across all links
+        for link in all_links_sorted:
+            if cur_sim == 100:
+                break
+            if not link.link_text:
+                continue
 
-            url = row['URL']
-            start_link_set = set()
-            dist_info = []
-            start_link_set.add(LinkData(link_text='BASE', link_url=url, depth=0))
-            recursed_lcl_links, recursed_ext_links = set(), set()
-            recursed_lcl_links, recursed_ext_links = self._recurse_scan_all_unique_links_in_site(url=url,
-                                                                                            base_url=url, 
-                                                                                            local_link_set=start_link_set,
-                                                                                            external_link_set=set())
+            sim = closest_link_match(link.link_text, self.board_meeting_keywords)
+            if sim > cur_sim:
+                best_link = link
+                cur_sim = sim
 
-            cur_sim = self.boe_link_similarity_cutoff
-            best_link = None
-            all_links = recursed_lcl_links
-            all_links.update(recursed_ext_links)
-            all_links_sorted = sorted(list(all_links), key=lambda x: x.depth_found)
-            ext_links_sorted = sorted(list(recursed_ext_links), key=lambda x: x.depth_found)
+        # Identify External Links Pointing to social media sites 
+        sites_identified = {}
+        num_ext_links = len(ext_links_sorted)
+        ext_id = 0
 
-            # look for the most likely board meeting link across all links
-            for link in all_links_sorted:
-                if cur_sim == 100:
-                    break
-                if not link.link_text:
-                    continue
+        # Temp assignment because we pop from this list every iteration
+        social_media_sites = self.social_media_sites.copy()
+        while ext_id < num_ext_links:
+            ext_link = ext_links_sorted[ext_id]
+            scl_id = 0
+            while scl_id < len(social_media_sites):
+                if social_media_sites[scl_id] in ext_link.link_url:
+                    sites_identified[social_media_sites.pop(scl_id)] = ext_link.depth_found
+                scl_id += 1
 
-                sim = closest_link_match(link.link_text, self.board_meeting_keywords)
-                if sim > cur_sim:
-                    best_link = link
-                    cur_sim = sim
+            ext_id += 1
 
-            # Identify External Links Pointing to social media sites 
-            sites_identified = {}
-            num_ext_links = len(ext_links_sorted)
-            ext_id = 0
-
-            # Temp assignment because we pop from this list every iteration
-            social_media_sites = self.social_media_sites.copy()
-            while ext_id < num_ext_links:
-                ext_link = ext_links_sorted[ext_id]
-                scl_id = 0
-                while scl_id < len(social_media_sites):
-                    if social_media_sites[scl_id] in ext_link.link_url:
-                        sites_identified[social_media_sites.pop(scl_id)] = ext_link.depth_found
-                    scl_id += 1
-
-                ext_id += 1
-
-                if len(social_media_sites) == 0:
-                    break
-            
-            if best_link:
-                self.url_data[row['Agency ID']] = (sites_identified, best_link.link_text, best_link.link_url, best_link.depth_found)
-            else: 
-                self.url_data[row['Agency ID']] = (sites_identified, None, None, None)
+            if len(social_media_sites) == 0:
+                break
         
+        if best_link:
+            self.url_data[self.agency_id] = (sites_identified, best_link.link_text, best_link.link_url, best_link.depth_found)
+        else: 
+            self.url_data[self.agency_id] = (sites_identified, None, None, None)
+                
         logger.info(msg='District URL processing complete')
         
 
@@ -138,7 +133,6 @@ class DistrictWebsiteScraper:
         except:
             return set(), set()
 
-        # Give the page time to load
         # Wait for the page to be fully loaded
         self.wait.until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
         
@@ -178,8 +172,8 @@ class DistrictWebsiteScraper:
         new_links_sorted = sorted(list(new_links), key=lambda x: x.num_url_sections)
             
         for link in new_links_sorted:
-            if self.verbose:
-                print(' '*(depth+1) + '|_' + str(depth) + ': ' + str(len(local_link_set)))
+            # if self.verbose:
+            #     print(' '*(depth+1) + '|_' + str(depth) + ': ' + str(len(local_link_set)))
             # Recursion time
             recursed_lcl_links, recursed_ext_links = self._recurse_scan_all_unique_links_in_site(url=link.link_url, 
                                                                                             base_url=base_url,
