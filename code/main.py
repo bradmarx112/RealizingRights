@@ -78,4 +78,4 @@ if __name__ == '__main__':
     source_info = {'path': 'data/USSchoolDistrictWebsiteInfo.xlsx', 'sheet': 'ELSI Export', 'head_row': 6}
     write_file_path = 'data/SampleOutput.csv'
     
-    main(source_info=source_info, write_file_path=write_file_path, verbose=False, max_dist_runs=100, out_file_name=write_file_path)
+    main(source_info=source_info, write_file_path=write_file_path, verbose=False, max_dist_runs=500, out_file_name=write_file_path)

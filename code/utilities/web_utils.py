@@ -82,8 +82,11 @@ def prepend_root_to_url(base_url: str, prefix: str, subdomain: str = 'www') -> s
 
     # Some URLs have a custom subdomain instead of 'www.' In these cases, dont add the 'www' to the start
     url = make_https(url.removesuffix('/'))
-    if not url.startswith(f'https://{subdomain}.') and len(get_url_components(url=url)) < 3:
+    if not url:
+        url = prefix + '/' + base_url
+    elif not url.startswith(f'https://{subdomain}.') and len(get_url_components(url=url)) < 3:
         url = f'https://{subdomain}.' + url.removeprefix('https://')
+    
 
     return url
 
@@ -278,7 +281,7 @@ def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriv
 if __name__ == '__main__':
     drvr, actions, wait = make_driver_utils()
 
-    start_url = 'https://www.fusd.net'
+    start_url = 'https://www.srvusd.net'
     start_link_set = set()
     start_link_set.add(LinkData(link_text='BASE', link_url=start_url, depth=0))
 
@@ -295,25 +298,21 @@ if __name__ == '__main__':
     boe_similarity_scores = {}
     cur_sim = 60
     best_link = None
-    rll_str_sort = sorted(recursed_lcl_links, key=lambda x: len(x.link_text), reverse=True)
-    for lcl_link in rll_str_sort:
-        sim = closest_link_match(lcl_link.link_text, board_meeting_keywords)
+    all_links = recursed_lcl_links
+    all_links.update(recursed_ext_links)
+    all_links_sorted = sorted(list(all_links), key=lambda x: x.depth_found)
+    ext_links_sorted = sorted(list(recursed_ext_links), key=lambda x: x.depth_found)
+
+    for link in all_links_sorted:
+        if cur_sim == 100:
+            break
+        if not link.link_text:
+            continue
+
+        sim = closest_link_match(link.link_text, board_meeting_keywords)
         if sim > cur_sim:
-            best_link = lcl_link
+            best_link = link
             cur_sim = sim
-
-    rel_str_sort = sorted(recursed_lcl_links, key=lambda x: len(x.link_text), reverse=True)
-    for ext_link in rel_str_sort:
-        if ext_link.link_text:
-            sim = closest_link_match(ext_link.link_text, board_meeting_keywords)
-            if sim > cur_sim:
-                best_link = ext_link
-                cur_sim = sim
-
-    for lcl_link in recursed_lcl_links:
-        boe_similarity_scores[lcl_link.link_url] = [closest_link_match(lcl_link.link_text, board_meeting_keywords), lcl_link.link_text]
-
-    boe_similarity_scores = sorted(boe_similarity_scores.items(), key=lambda item: item[1], reverse=True)
 
     # Identify External Links Pointing to social media sites 
     sites_identified = {}

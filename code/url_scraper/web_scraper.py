@@ -225,3 +225,12 @@ class DistrictWebsiteScraper:
                     new_local_link_set.add(LinkData(link_text, link_url, depth=depth))
 
         return new_local_link_set, external_link_set
+
+
+if __name__ == '__main__':
+
+    start_url = 'https://www.srvusd.net'
+
+    test_scraper = DistrictWebsiteScraper(url=start_url, agency_id=1000, verbose=True)
+    test_scraper.find_board_meeting_and_social_media_links()
+    print(test_scraper.url_data)
