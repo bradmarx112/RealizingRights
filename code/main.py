@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 pipeline = queue.Queue()
 full_df = pd.DataFrame()
+urls_processed = 0
 
 def main(source_info: dict, write_file_path: str, verbose: bool, max_dist_runs: int, out_file_name: str) -> None:
     global full_df
@@ -37,7 +38,7 @@ def main(source_info: dict, write_file_path: str, verbose: bool, max_dist_runs: 
     num_urls = len(url_list_to_process)
     url_id_zip = [(url, a_id) for url, a_id in zip(list(district_df_to_use['URL']), list(district_df_to_use['Agency ID']))]
 
-    with ThreadPoolExecutor(max_workers=6) as executor:
+    with ThreadPoolExecutor(max_workers=10) as executor:
 
         _ = executor.submit(build_output_df, num_urls)
         executor.map(scrape_district, url_id_zip)
@@ -52,22 +53,25 @@ def main(source_info: dict, write_file_path: str, verbose: bool, max_dist_runs: 
 
 
 def scrape_district(url_id_tuple: tuple):
+    global urls_processed
     try:
         district_scraper = DistrictWebsiteScraper(url=url_id_tuple[0], agency_id=url_id_tuple[1], verbose=True)
         district_scraper.find_board_meeting_and_social_media_links()
         pipeline.put(district_scraper.url_data)
     except Exception as e:
         print(f"Exception in scrape_district: {e}")
+        urls_processed += 1
 
 
 def build_output_df(num_urls: int):
     global full_df
-    urls_processed = 0
+    global urls_processed
     while urls_processed < num_urls:
         url_info_dict = pipeline.get()
         url_info_row = format_output_boe_df(url_data=url_info_dict, social_media_sites=social_media_sites)
         full_df = full_df.append(url_info_row)
         urls_processed += 1
+        print(urls_processed)
 
 
 if __name__ == '__main__':
