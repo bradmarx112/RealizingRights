@@ -1,5 +1,5 @@
 # RealizingRights
-Repository for web scraping services used to support the 'Realizing Rights' research program at Brown University.
+Repository for web scraping services used to support the 'Realizing Rights' research program at Brown University. Multithreaded application which crawls through school district websites to find the location on each website where school board meeting information is contained. Also tracks the presence of school district social media links. Outputs data to .csv.
 
 ## Requirements
 - Python 3

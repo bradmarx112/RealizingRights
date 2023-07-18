@@ -38,7 +38,7 @@ def main(source_info: dict, write_file_path: str, verbose: bool, max_dist_runs: 
     num_urls = len(url_list_to_process)
     url_id_zip = [(url, a_id) for url, a_id in zip(list(district_df_to_use['URL']), list(district_df_to_use['Agency ID']))]
 
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=12) as executor:
 
         _ = executor.submit(build_output_df, num_urls)
         executor.map(scrape_district, url_id_zip)
@@ -80,4 +80,4 @@ if __name__ == '__main__':
     source_info = {'path': 'data/USSchoolDistrictWebsiteInfo.xlsx', 'sheet': 'ELSI Export', 'head_row': 6}
     write_file_path = 'data/SampleOutput.csv'
     
-    main(source_info=source_info, write_file_path=write_file_path, verbose=False, max_dist_runs=1000, out_file_name=write_file_path)
+    main(source_info=source_info, write_file_path=write_file_path, verbose=False, max_dist_runs=4000, out_file_name=write_file_path)
