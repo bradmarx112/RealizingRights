@@ -54,12 +54,14 @@ def main(source_info: dict, write_file_path: str, verbose: bool, max_dist_runs: 
 
 def scrape_district(url_id_tuple: tuple):
     global urls_processed
+    print(f'Parsing {url_id_tuple[0]}...')
     try:
-        district_scraper = DistrictWebsiteScraper(url=url_id_tuple[0], agency_id=url_id_tuple[1], verbose=True)
+        district_scraper = DistrictWebsiteScraper(url=url_id_tuple[0], agency_id=url_id_tuple[1], verbose=False)
         district_scraper.find_board_meeting_and_social_media_links()
         pipeline.put(district_scraper.url_data)
+        print(f'{url_id_tuple[0]} Done')
     except Exception as e:
-        print(f"Exception in scrape_district: {e}")
+        print(f"{url_id_tuple[0]} Error: {e}")
         urls_processed += 1
 
 
@@ -78,4 +80,4 @@ if __name__ == '__main__':
     source_info = {'path': 'data/USSchoolDistrictWebsiteInfo.xlsx', 'sheet': 'ELSI Export', 'head_row': 6}
     write_file_path = 'data/SampleOutput.csv'
     
-    main(source_info=source_info, write_file_path=write_file_path, verbose=False, max_dist_runs=500, out_file_name=write_file_path)
+    main(source_info=source_info, write_file_path=write_file_path, verbose=False, max_dist_runs=1000, out_file_name=write_file_path)

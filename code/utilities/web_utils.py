@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
@@ -45,7 +46,7 @@ def make_driver_utils():
     options = webdriver.ChromeOptions()
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--incognito')
-    options.add_argument('--headless')
+    # options.add_argument('--headless')
     options.add_argument("--disable-features=AutoplayIgnoreWebAudio")
     driver = webdriver.Chrome("drivers/chromedriver.exe", options=options)
     driver.set_window_size(1600, 1600)
@@ -161,18 +162,21 @@ def closest_link_match(name, link_candidates) -> int:
 
 
 def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains):
-    hover_menus = drvr.find_elements(By.CSS_SELECTOR, "[aria-haspopup='true'][aria-expanded='false']")
-    if not hover_menus:
-        hover_menus = drvr.find_elements(By.CSS_SELECTOR, "[aria-expanded='false']")
+    # hover_menus = drvr.find_elements(By.CSS_SELECTOR, "[aria-haspopup='true'][aria-expanded='false']")
+    # if not hover_menus:
+    hover_menus = drvr.find_elements(By.CSS_SELECTOR, "[aria-expanded='false']")
     menu_links = set()
+    orig_url = drvr.current_url
     # Loop through each <select> element and move the mouse to it to expand its options
     for menu in hover_menus:
         # Wait for the menu to become visible
         
         hover = actions.move_to_element(menu)
         try:
-            hover.perform()
+            
             hover.click(on_element=menu)
+            hover.perform()
+            # actions.click()
             time.sleep(1)
         except:
             continue
@@ -185,6 +189,8 @@ def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains):
 
         # Add the expanded links to the links list
         menu_links.update(set(expanded_links))
+
+        actions.send_keys(Keys.ESCAPE).perform()
     
     return menu_links
 
