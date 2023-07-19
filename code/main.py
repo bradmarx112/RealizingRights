@@ -38,7 +38,7 @@ def main(source_info: dict, write_file_path: str, verbose: bool, max_dist_runs: 
     num_urls = len(url_list_to_process)
     url_id_zip = [(url, a_id) for url, a_id in zip(list(district_df_to_use['URL']), list(district_df_to_use['Agency ID']))]
 
-    with ThreadPoolExecutor(max_workers=12) as executor:
+    with ThreadPoolExecutor(max_workers=15) as executor:
 
         _ = executor.submit(build_output_df, num_urls)
         executor.map(scrape_district, url_id_zip)

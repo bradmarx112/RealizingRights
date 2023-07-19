@@ -229,7 +229,7 @@ class DistrictWebsiteScraper:
 
 if __name__ == '__main__':
 
-    start_url = 'https://www.paoli.k12.in.us'
+    start_url = 'https://www.mcdonald.k12.oh.us'
 
     test_scraper = DistrictWebsiteScraper(url=start_url, agency_id=1000, verbose=True)
     test_scraper.find_board_meeting_and_social_media_links()

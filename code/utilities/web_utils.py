@@ -76,7 +76,9 @@ def find_in_url(url: str,
 
 def prepend_root_to_url(base_url: str, prefix: str, subdomain: str = 'www') -> str:
     # If URL only provides path to page without Root URL, add the root
-    if base_url[0] == '/':
+    if base_url[:2] == '//':
+        url = 'https:' + base_url
+    elif base_url[0] == '/':
         url = prefix + base_url
     else:
         url = base_url
@@ -88,7 +90,6 @@ def prepend_root_to_url(base_url: str, prefix: str, subdomain: str = 'www') -> s
     elif not url.startswith(f'https://{subdomain}.') and len(get_url_components(url=url)) < 3:
         url = f'https://{subdomain}.' + url.removeprefix('https://')
     
-
     return url
 
 

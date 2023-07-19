@@ -1,7 +1,7 @@
 
 
 # Do not process URLs that have any of these terms in them.
-blacklist_terms = ['login', 'lightbox', 'file', '.php', '#', '.pdf', '.doc', '.jpg', 'tel:']
+blacklist_terms = ['login', 'lightbox', 'file', '.php', '#', '.pdf', '.doc', '.jpg', 'tel:', 'javascript']
 
 # Phrases to look for in links that could contain board meeting URLs
 link_keywords = ['boe meeting', 'board meeting', 'board of education', 'parent', 'school board', 'board minutes', 'board',
