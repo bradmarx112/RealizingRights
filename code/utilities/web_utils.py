@@ -30,6 +30,9 @@ logger = logging.getLogger(__name__)
 
 
 def make_https(url) -> str:
+    '''
+    Replaces URL protocol with HTTPS and returns completed string, or replaces string with None if malformed.
+    '''
     try:
         strt, prt, url = url.partition('://')
         if url[-1] == '/':
@@ -43,6 +46,13 @@ def make_https(url) -> str:
 
 
 def make_driver_utils():
+    '''
+    Sets up Selenium objects for scraping:
+    
+    - Headless Google Chrome driver
+    - ActionChain object
+    - WebDriverWait object
+    '''
     options = webdriver.ChromeOptions()
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--incognito')
@@ -60,6 +70,12 @@ def find_in_url(url: str,
                 item: int = -1,
                 cleanup: bool = True) -> str:
 
+    '''
+    Partitions a URL (or any string) into a list of partitions partitioned by a forward slash.
+    Replaces any non number/letter with a blank space if cleanup = True
+    Returns element from partitioning list specified by item parameter.
+    '''
+
     elements = re.findall(r"[^/]+", url)
     try:
         target = elements[item]
@@ -74,19 +90,24 @@ def find_in_url(url: str,
     return target
 
 
-def prepend_root_to_url(base_url: str, prefix: str, subdomain: str = 'www') -> str:
+def prepend_root_to_url(initial_url: str, prefix: str, subdomain: str = 'www') -> str:
+    '''
+    Adds base URL to truncated links which only contain a site filepath.
+    For URL roots that are missing a subdomain, append the subdomain to the start of them.
+    '''
+
     # If URL only provides path to page without Root URL, add the root
-    if base_url[:2] == '//':
-        url = 'https:' + base_url
-    elif base_url[0] == '/':
-        url = prefix + base_url
+    if initial_url[:2] == '//':
+        url = 'https:' + initial_url
+    elif initial_url[0] == '/':
+        url = prefix + initial_url
     else:
-        url = base_url
+        url = initial_url
 
     # Some URLs have a custom subdomain instead of 'www.' In these cases, dont add the 'www' to the start
-    url = make_https(url.removesuffix('/'))
+    url = make_https(url)
     if not url:
-        url = prefix + '/' + base_url
+        url = prefix + '/' + initial_url
     elif not url.startswith(f'https://{subdomain}.') and len(get_url_components(url=url)) < 3:
         url = f'https://{subdomain}.' + url.removeprefix('https://')
     
@@ -94,6 +115,10 @@ def prepend_root_to_url(base_url: str, prefix: str, subdomain: str = 'www') -> s
 
 
 def is_local_link(url: str, root_url: str) -> bool:
+    '''
+    Determines if a given URL links to another page within the same website or not.
+    '''
+
     if root_url in url:
         return True
     else:
@@ -101,6 +126,9 @@ def is_local_link(url: str, root_url: str) -> bool:
 
 
 def is_external_link(url: str, root_url: str) -> bool:
+    '''
+    Determines if a given URL links to an external website or not.
+    '''
     
     if url.startswith(root_url):
         return False
@@ -111,6 +139,12 @@ def is_external_link(url: str, root_url: str) -> bool:
 
 
 def try_getting_url_text(tag):
+    '''
+    Attempts to capture the text a given URL link is attached to on a webpage.
+    Checks the 'text' element first, and if that is empty, then checks the 'string'
+    Element.
+    '''
+
     text = tag.text
 
     if not text:
@@ -128,6 +162,10 @@ def try_getting_url_text(tag):
 
 
 def get_subdomain(url: str) -> str:
+    '''
+    Finds the subdomain of the root site URL (ie. 'www').
+    Needed to account for sites with custom subdomains.
+    '''
     url_components = get_url_components(url=url)
     if len(url_components) >= 3: 
         sdomain = url_components[0]
@@ -138,14 +176,28 @@ def get_subdomain(url: str) -> str:
 
 
 def get_url_components(url: str) -> list:
+    '''
+    Returns a list of the 'pieces' of the root of a URL
+    Pieces are defined as the strings separated by periods 
+    between https:// and any trailing forward slash. 
+
+    Example: 
+
+    get_url_components(url='https://www.hello-world.com/newpage')
+    returns:  ['www', 'hello-world', 'com']
+    '''
+
     url_root = find_in_url(url=url, item=1, cleanup=False)
-    url_comps = url_root.partition('.')
+    url_comps = re.findall(r'[^\.]+', url_root)
 
     return url_comps
 
 
 def closest_link_match(name, link_candidates) -> int:
     '''
+    Compares a given link text (string) to a list of target keywords, then
+    returns the fuzzy match score between that text and the most similar keyword.
+
     params: 
         name (String) : initial string
         link_candidates (List) : list of candidate strings
@@ -163,6 +215,11 @@ def closest_link_match(name, link_candidates) -> int:
 
 
 def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains):
+    '''
+    Simulates mouse and keyboard actions to open all dropdown and pop-up menus on a webpage, and collects 
+    all the extra links that appear in these menus. 
+    '''
+
     # hover_menus = drvr.find_elements(By.CSS_SELECTOR, "[aria-haspopup='true'][aria-expanded='false']")
     # if not hover_menus:
     hover_menus = drvr.find_elements(By.CSS_SELECTOR, "[aria-expanded='false']")
@@ -194,149 +251,3 @@ def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains):
         actions.send_keys(Keys.ESCAPE).perform()
     
     return menu_links
-
-
-def recurse_scan_all_unique_links_in_site(url: str, base_url: str, drvr: webdriver.Chrome, actions: ActionChains, wait,
-                                            link_keywords: list,
-                                            local_link_set: set = set(),
-                                            external_link_set: set = set(),
-                                            depth: int = 0,
-                                            blacklist_terms: list = [],
-                                            subdomain: str = 'www'):
-
-    # First, try to get the web page.
-    try:
-        drvr.get(url)
-    except:
-        return set(), set()
-
-    # Give the page time to load
-    # Wait for the page to be fully loaded
-    wait.until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
-    
-    # Dont bother with '404 error' pages
-    if drvr.title.lower() == 'page not found':
-        return set(), set()
-
-    print(f'Depth {depth} for {url}')
-    soup = BeautifulSoup(drvr.page_source, 'html.parser')
-    # Find all Links on page
-    raw_links = set(soup.find_all("a"))
-
-    if depth == 0:
-        # Accounting for redirects to other url names
-        subdomain = get_subdomain(url=drvr.current_url)
-        base_url = prepend_root_to_url(base_url=drvr.current_url, prefix='', subdomain=subdomain)
-        base_url = find_in_url(url=base_url, item=0, cleanup=False) + '//' + find_in_url(url=base_url, item=1, cleanup=False) 
-        url = base_url
-        # Find links in drop down menus. Assuming the menus appear on every page so only get them the first time
-        menu_links = iterate_through_menus(drvr=drvr, actions=actions)
-        raw_links.update(menu_links)
-
-    # Compare new local links to old so we dont enter an infinite loop of links!
-    new_local_link_set = set()
-    for raw_link in raw_links:
-        try:
-            # Only pick up links with valid URL structure
-            link_url = raw_link.attrs['href']
-            # Skip blacklisted terms 
-            if any([term in link_url.lower() for term in blacklist_terms]):
-                continue
-            link_url = prepend_root_to_url(link_url, base_url, subdomain=subdomain)
-        except:
-            continue
-
-        link_text = try_getting_url_text(raw_link)
-
-        if is_external_link(link_url, base_url):
-            external_link_set.add(LinkData(link_text, link_url, depth=depth))
-
-        # Add link to proper set
-        elif is_local_link(link_url, base_url):
-            if not link_text:
-                continue
-            if closest_link_match(name=link_text, link_candidates=link_keywords) > 90:
-                new_local_link_set.add(LinkData(link_text, link_url, depth=depth))
-        
-    # Only pick up links that did not appear in any other page seen so far
-    new_links = new_local_link_set - local_link_set
-    # Add those links to set of current links, but if they already exist do not overwrite previous instance
-    local_link_set.update(new_local_link_set)
-    # Sort links to iterate over by 'depth' (How many sections between slashes there are)
-    new_links_sorted = sorted(list(new_links), key=lambda x: x.num_url_sections)
-        
-    for link in new_links_sorted:
-        print(' '*(depth+1) + '|_' + str(depth) + ': ' + str(len(local_link_set)))
-        # Recursion time
-        recursed_lcl_links, recursed_ext_links = recurse_scan_all_unique_links_in_site(url=link.link_url, 
-                                                                                        base_url=base_url,
-                                                                                        drvr=drvr, 
-                                                                                        actions=actions,
-                                                                                        wait=wait,
-                                                                                        local_link_set=local_link_set,
-                                                                                        external_link_set=external_link_set,
-                                                                                        depth=depth + 1,
-                                                                                        blacklist_terms=blacklist_terms,
-                                                                                        link_keywords=link_keywords,
-                                                                                        subdomain=subdomain)
-        local_link_set.update(recursed_lcl_links)
-        external_link_set.update(recursed_ext_links)
-
-    return local_link_set, external_link_set
-
-
-if __name__ == '__main__':
-    drvr, actions, wait = make_driver_utils()
-
-    start_url = 'https://www.srvusd.net'
-    start_link_set = set()
-    start_link_set.add(LinkData(link_text='BASE', link_url=start_url, depth=0))
-
-    # Get ALL Internal and External links in a website
-    recursed_lcl_links, recursed_ext_links = recurse_scan_all_unique_links_in_site(url=start_url,
-                                                                                    base_url=start_url, 
-                                                                                    local_link_set=start_link_set,
-                                                                                    drvr=drvr, 
-                                                                                    actions=actions,
-                                                                                    blacklist_terms=blacklist_terms,
-                                                                                    wait=wait,
-                                                                                    link_keywords=link_keywords)
-
-    boe_similarity_scores = {}
-    cur_sim = 60
-    best_link = None
-    all_links = recursed_lcl_links
-    all_links.update(recursed_ext_links)
-    all_links_sorted = sorted(list(all_links), key=lambda x: x.depth_found)
-    ext_links_sorted = sorted(list(recursed_ext_links), key=lambda x: x.depth_found)
-
-    for link in all_links_sorted:
-        if cur_sim == 100:
-            break
-        if not link.link_text:
-            continue
-
-        sim = closest_link_match(link.link_text, board_meeting_keywords)
-        if sim > cur_sim:
-            best_link = link
-            cur_sim = sim
-
-    # Identify External Links Pointing to social media sites 
-    sites_identified = {}
-    ext_link_list = list(recursed_ext_links)
-    num_ext_links = len(ext_link_list)
-    ext_id = 0
-    while ext_id < num_ext_links:
-        ext_link = ext_link_list[ext_id]
-        scl_id = 0
-        while scl_id < len(social_media_sites):
-            if social_media_sites[scl_id] in ext_link.link_url:
-                sites_identified[social_media_sites.pop(scl_id)] = ext_link.depth_found
-            scl_id += 1
-
-        ext_id += 1
-        
-        if len(social_media_sites) == 0:
-            break
-
-    print('done')

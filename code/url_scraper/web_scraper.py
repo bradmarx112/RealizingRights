@@ -150,9 +150,8 @@ class DistrictWebsiteScraper:
         if depth == 0:
             # Accounting for redirects to other url names
             subdomain = get_subdomain(url=self.drvr.current_url)
-            base_url = prepend_root_to_url(base_url=self.drvr.current_url, prefix='', subdomain=subdomain)
+            base_url = prepend_root_to_url(initial_url=self.drvr.current_url, prefix='', subdomain=subdomain)
             base_url = find_in_url(url=base_url, item=0, cleanup=False) + '//' + find_in_url(url=base_url, item=1, cleanup=False) 
-            url = base_url
             # Find links in drop down menus. Assuming the menus appear on every page so only get them the first time
             menu_links = iterate_through_menus(drvr=self.drvr, actions=self.actions)
             raw_links.update(menu_links)
@@ -229,7 +228,7 @@ class DistrictWebsiteScraper:
 
 if __name__ == '__main__':
 
-    start_url = 'https://www.mcdonald.k12.oh.us'
+    start_url = 'https://cfsd.chipfalls.k12.wi.us'
 
     test_scraper = DistrictWebsiteScraper(url=start_url, agency_id=1000, verbose=True)
     test_scraper.find_board_meeting_and_social_media_links()
