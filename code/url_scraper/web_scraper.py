@@ -3,21 +3,12 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 
-import queue
 import os.path
 import sys
-import pandas as pd
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from utilities.web_utils import (prepend_root_to_url, make_driver_utils, find_in_url, is_local_link, iterate_through_menus,
                                   is_external_link, try_getting_url_text, get_subdomain, closest_link_match)
-from datetime import datetime as dt
 import logging
-
-# currentdir = os.path.dirname(os.path.realpath(__file__))
-# parentdir = os.path.dirname(currentdir)
-# gparentdir = os.path.dirname(parentdir)
-# sys.path.append(parentdir)
-# sys.path.append(gparentdir)
 
 from url_scraper.link_data import LinkData
 from objects.scrape_lists import blacklist_terms, link_keywords, board_meeting_keywords, social_media_sites
@@ -228,7 +219,7 @@ class DistrictWebsiteScraper:
 
 if __name__ == '__main__':
 
-    start_url = 'https://cfsd.chipfalls.k12.wi.us'
+    start_url = 'https://www.tcsd.org'
 
     test_scraper = DistrictWebsiteScraper(url=start_url, agency_id=1000, verbose=True)
     test_scraper.find_board_meeting_and_social_media_links()
