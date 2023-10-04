@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 class LinkData:
     def __init__(self, link_text: str, link_url: str, depth: int):
         self.link_text = link_text
-        self.link_url = link_url.removesuffix('/').lower()
+        self.link_url = link_url.removesuffix('/')  #.lower()
         self.depth_found = depth
         self.num_url_sections = len(re.findall(r"[^/]+", self.link_url))
 

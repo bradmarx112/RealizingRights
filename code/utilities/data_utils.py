@@ -24,12 +24,13 @@ def format_input_district_df(dist_df: pd.DataFrame) -> pd.DataFrame:
         logger.error(msg='Provided dataframe is malformed! Unable to process.')
         return dist_df
 
+    # Ignore districts with no students
     dist_df = dist_df[dist_df['NumStudents'] > 0]
     # Ignore districts without any URL
     dist_df = dist_df[~dist_df['URL'].isna()]
     
     # Make lowercase and add 'www' to URLs where applicable
-    dist_df['URL'] = dist_df['URL'].apply(lambda x: prepend_root_to_url(base_url=x.lower(), prefix=''))
+    dist_df['URL'] = dist_df['URL'].apply(lambda x: prepend_root_to_url(initial_url=x.lower(), prefix=''))
 
     return dist_df
 

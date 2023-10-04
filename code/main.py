@@ -24,6 +24,8 @@ def main(source_info: dict, write_file_path: str, verbose: bool, max_dist_runs: 
     xlsx_input = pd.read_excel(io=source_info['path'], sheet_name=source_info['sheet'], header=source_info['head_row'])
     district_df = format_input_district_df(dist_df=xlsx_input)
 
+    # If the file to which we are writing exists (which happens when we process some, but not all, URLs),
+    # Filter out the websites we have already evaluated from the input data.
     if os.path.isfile(out_file_name):
         out_file_df = pd.read_csv(out_file_name)
         district_df = district_df.merge(out_file_df['District ID'], left_on='Agency ID', right_on='District ID', how='left')

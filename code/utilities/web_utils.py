@@ -5,6 +5,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
+
 from urllib.request import urlopen, Request
 import time
 import re
@@ -26,7 +29,7 @@ from objects.scrape_lists import blacklist_terms, link_keywords, board_meeting_k
 
 __author__ = 'bmarx'
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('selenium')
 
 
 def make_https(url) -> str:
@@ -53,12 +56,15 @@ def make_driver_utils():
     - ActionChain object
     - WebDriverWait object
     '''
+    service = Service()
     options = webdriver.ChromeOptions()
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--incognito')
     options.add_argument('--headless')
     options.add_argument("--disable-features=AutoplayIgnoreWebAudio")
-    driver = webdriver.Chrome("drivers/chromedriver.exe", options=options)
+    # driver = webdriver.Chrome("drivers/chromedriver.exe", options=options)
+    # driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
     driver.set_window_size(1600, 1600)
     actions = ActionChains(driver)
     wait = WebDriverWait(driver, 5)
@@ -214,7 +220,7 @@ def closest_link_match(name, link_candidates) -> int:
     return clst_url_score
 
 
-def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains):
+def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains) -> set:
     '''
     Simulates mouse and keyboard actions to open all dropdown and pop-up menus on a webpage, and collects 
     all the extra links that appear in these menus. 

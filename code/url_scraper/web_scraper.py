@@ -4,6 +4,7 @@ from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 
 import os.path
+import time
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from utilities.web_utils import (prepend_root_to_url, make_driver_utils, find_in_url, is_local_link, iterate_through_menus,
@@ -110,7 +111,7 @@ class DistrictWebsiteScraper:
             self.url_data[self.agency_id] = (sites_identified, None, None, None)
                 
         logger.info(msg='District URL processing complete')
-        
+
 
     def _recurse_scan_all_unique_links_in_site(self, url: str, base_url: str, 
                                                 local_link_set: set = set(),
@@ -126,7 +127,8 @@ class DistrictWebsiteScraper:
 
         # Wait for the page to be fully loaded
         self.wait.until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
-        
+        time.sleep(1)
+
         # Dont bother with '404 error' pages
         if self.drvr.title.lower() == 'page not found':
             return set(), set()
@@ -145,7 +147,9 @@ class DistrictWebsiteScraper:
             base_url = find_in_url(url=base_url, item=0, cleanup=False) + '//' + find_in_url(url=base_url, item=1, cleanup=False) 
             # Find links in drop down menus. Assuming the menus appear on every page so only get them the first time
             menu_links = iterate_through_menus(drvr=self.drvr, actions=self.actions)
+            link_diff = menu_links - raw_links
             raw_links.update(menu_links)
+            
 
         # Classify each raw link as either internal or external
         new_local_link_set, external_link_set = self._classify_raw_links(raw_links=raw_links, 
@@ -219,7 +223,7 @@ class DistrictWebsiteScraper:
 
 if __name__ == '__main__':
 
-    start_url = 'https://www.tcsd.org'
+    start_url = 'https://www3.dadeschools.net'
 
     test_scraper = DistrictWebsiteScraper(url=start_url, agency_id=1000, verbose=True)
     test_scraper.find_board_meeting_and_social_media_links()
