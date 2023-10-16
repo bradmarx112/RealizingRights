@@ -12,7 +12,8 @@ from utilities.web_utils import (prepend_root_to_url, make_driver_utils, find_in
 import logging
 
 from url_scraper.link_data import LinkData
-from objects.scrape_lists import blacklist_terms, link_keywords, board_meeting_keywords, social_media_sites
+from objects.scrape_lists import (blacklist_terms, boe_link_keywords, board_meeting_keywords, social_media_sites,
+                                  disability_link_keywords, disability_keywords)
 
 __author__ = 'bmarx'
 
@@ -27,8 +28,8 @@ class DistrictWebsiteScraper:
                  site_link_relevance_cutoff: int = 90,
                  boe_link_similarity_cutoff: int = 60,
                  blacklist_terms: list = blacklist_terms, 
-                 link_keywords: list = link_keywords, 
-                 board_meeting_keywords: list = board_meeting_keywords, 
+                 link_keywords: list = boe_link_keywords, 
+                 target_keywords: list = board_meeting_keywords, 
                  social_media_sites: list = social_media_sites,
                  verbose: bool = False
                  ):
@@ -44,7 +45,7 @@ class DistrictWebsiteScraper:
         # Lists of terms for filtering and similarity scoring
         self.blacklist_terms = blacklist_terms
         self.link_keywords = link_keywords
-        self.board_meeting_keywords = board_meeting_keywords
+        self.target_keywords = target_keywords
         self.social_media_sites = social_media_sites
 
         # Utilities for Selenium driver
@@ -80,7 +81,7 @@ class DistrictWebsiteScraper:
             if not link.link_text:
                 continue
 
-            sim = closest_link_match(link.link_text, self.board_meeting_keywords)
+            sim = closest_link_match(link.link_text, self.target_keywords)
             if sim > cur_sim:
                 best_link = link
                 cur_sim = sim
@@ -140,6 +141,9 @@ class DistrictWebsiteScraper:
         # Find all Links on page
         raw_links = set(soup.find_all("a"))
 
+        # The home page of a district site often has drop-down menus with relevant links we should include.
+        # The raw_links set above would not include them yet (as the HTML does not reveal the menus until clicked on),
+        # So we should manually click on each menu to extract new possible links for processing!
         if depth == 0:
             # Accounting for redirects to other url names
             subdomain = get_subdomain(url=self.drvr.current_url)
@@ -149,7 +153,6 @@ class DistrictWebsiteScraper:
             menu_links = iterate_through_menus(drvr=self.drvr, actions=self.actions)
             link_diff = menu_links - raw_links
             raw_links.update(menu_links)
-            
 
         # Classify each raw link as either internal or external
         new_local_link_set, external_link_set = self._classify_raw_links(raw_links=raw_links, 
@@ -200,12 +203,12 @@ class DistrictWebsiteScraper:
             
             if is_external_link(link_url, base_url):
                 if link_text:
-                    boe_relevance_score = closest_link_match(link_text, self.board_meeting_keywords)
+                    relevance_score = closest_link_match(link_text, self.target_keywords)
                 else:
-                    boe_relevance_score = 0
+                    relevance_score = 0
                 # Only capture external links if they are social media links or related to BOE meetings
                 if any([site in link_url.lower() for site in self.social_media_sites]) \
-                    or boe_relevance_score > self.boe_link_similarity_cutoff:
+                    or relevance_score > self.boe_link_similarity_cutoff:
 
                     external_link_set.add(LinkData(link_text, link_url, depth=depth))
 
@@ -223,8 +226,9 @@ class DistrictWebsiteScraper:
 
 if __name__ == '__main__':
 
-    start_url = 'https://www3.dadeschools.net'
+    start_url = 'https://www.bcps.org'
 
-    test_scraper = DistrictWebsiteScraper(url=start_url, agency_id=1000, verbose=True)
+    test_scraper = DistrictWebsiteScraper(url=start_url, agency_id=1000, verbose=True,
+                                            link_keywords=disability_link_keywords, target_keywords=disability_keywords)
     test_scraper.find_board_meeting_and_social_media_links()
     print(test_scraper.url_data)

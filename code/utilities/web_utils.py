@@ -25,7 +25,7 @@ sys.path.append(parentdir)
 sys.path.append(gparentdir)
 
 from url_scraper.link_data import LinkData
-from objects.scrape_lists import blacklist_terms, link_keywords, board_meeting_keywords, social_media_sites
+
 
 __author__ = 'bmarx'
 

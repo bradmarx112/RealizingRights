@@ -35,19 +35,19 @@ def format_input_district_df(dist_df: pd.DataFrame) -> pd.DataFrame:
     return dist_df
 
 
-def format_output_boe_df(url_data: dict, social_media_sites: list) -> pd.DataFrame:
+def format_output_df(url_data: dict, social_media_sites: list, col_subject: str) -> pd.DataFrame:
     '''
     Converts dictionary output of web scraping process into dataframe suitable for export.
     '''
-    df_cols = ['District ID', 'Board Meeting URL Text', 'Board Meeting URL Link', 'Board Meeting Link Depth'] + social_media_sites
+    df_cols = ['District ID', f'{col_subject} URL Text', f'{col_subject} URL Link', f'{col_subject} Link Depth'] + social_media_sites
     boe_df = pd.DataFrame(columns=df_cols)
 
     for url, data in url_data.items():
         init_row = {
             'District ID': url,
-            'Board Meeting URL Text': data[1],
-            'Board Meeting URL Link': data[2],
-            'Board Meeting Link Depth': data[3]
+            f'{col_subject} URL Text': data[1],
+            f'{col_subject} URL Link': data[2],
+            f'{col_subject} Link Depth': data[3]
         }
 
         row = {key: init_row.get(key, None) for key in [*init_row, *social_media_sites]}
