@@ -46,6 +46,8 @@ def format_output_df(url_data: dict, social_media_sites: list, col_subject: str)
         init_row = {
             'District ID': url,
             f'{col_subject} URL Text': data[1],
+            f'{col_subject} Link Text Match Score': data[4],
+            f'{col_subject} Num Links Evaluated': data[5],
             f'{col_subject} URL Link': data[2],
             f'{col_subject} Link Depth': data[3]
         }

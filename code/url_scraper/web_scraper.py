@@ -26,7 +26,7 @@ class DistrictWebsiteScraper:
                  url: str,
                  agency_id: str,
                  site_link_relevance_cutoff: int = 90,
-                 boe_link_similarity_cutoff: int = 60,
+                 boe_link_similarity_cutoff: int = 75,
                  blacklist_terms: list = blacklist_terms, 
                  link_keywords: list = boe_link_keywords, 
                  target_keywords: list = board_meeting_keywords, 
@@ -50,10 +50,10 @@ class DistrictWebsiteScraper:
 
         # Utilities for Selenium driver
         self.drvr, self.actions, self.wait = make_driver_utils()
-        self.drvr.set_page_load_timeout(15)
         self.verbose = verbose
 
         self.url_data = {}
+        self.pages_scanned = 0
 
 
     def find_board_meeting_and_social_media_links(self) -> None:
@@ -107,10 +107,10 @@ class DistrictWebsiteScraper:
                 break
         
         if best_link:
-            self.url_data[self.agency_id] = (sites_identified, best_link.link_text, best_link.link_url, best_link.depth_found)
+            self.url_data[self.agency_id] = (sites_identified, best_link.link_text, best_link.link_url, best_link.depth_found, cur_sim, len(all_links_sorted))
         else: 
-            self.url_data[self.agency_id] = (sites_identified, None, None, None)
-                
+            self.url_data[self.agency_id] = (sites_identified, None, None, None, len(self.drvr.page_source), len(all_links_sorted))
+
         logger.info(msg='District URL processing complete')
 
 
@@ -123,19 +123,20 @@ class DistrictWebsiteScraper:
         # First, try to get the web page.
         try:
             self.drvr.get(url)
-        except:
+        except Exception as e:
+            print(e)
             return set(), set()
 
         # Wait for the page to be fully loaded
         self.wait.until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
-        time.sleep(1)
+        time.sleep(2)
 
         # Dont bother with '404 error' pages
         if self.drvr.title.lower() == 'page not found':
             return set(), set()
 
         if self.verbose:
-            print(f'Depth {depth} for {url}')
+            print(f'Depth {depth} for {self.drvr.current_url}')
 
         soup = BeautifulSoup(self.drvr.page_source, 'html.parser')
         # Find all Links on page
@@ -147,11 +148,12 @@ class DistrictWebsiteScraper:
         if depth == 0:
             # Accounting for redirects to other url names
             subdomain = get_subdomain(url=self.drvr.current_url)
+            local_link_set.add(LinkData(link_text='BASE_REDIRECT', link_url=self.drvr.current_url, depth=0))
             base_url = prepend_root_to_url(initial_url=self.drvr.current_url, prefix='', subdomain=subdomain)
             base_url = find_in_url(url=base_url, item=0, cleanup=False) + '//' + find_in_url(url=base_url, item=1, cleanup=False) 
             # Find links in drop down menus. Assuming the menus appear on every page so only get them the first time
             menu_links = iterate_through_menus(drvr=self.drvr, actions=self.actions)
-            link_diff = menu_links - raw_links
+            # link_diff = menu_links - raw_links
             raw_links.update(menu_links)
 
         # Classify each raw link as either internal or external
@@ -169,8 +171,7 @@ class DistrictWebsiteScraper:
         new_links_sorted = sorted(list(new_links), key=lambda x: x.num_url_sections)
             
         for link in new_links_sorted:
-            # if self.verbose:
-            #     print(' '*(depth+1) + '|_' + str(depth) + ': ' + str(len(local_link_set)))
+
             # Recursion time
             recursed_lcl_links, recursed_ext_links = self._recurse_scan_all_unique_links_in_site(url=link.link_url, 
                                                                                             base_url=base_url,
@@ -187,48 +188,72 @@ class DistrictWebsiteScraper:
     def _classify_raw_links(self, raw_links: list, external_link_set: set, base_url: str, subdomain: str, depth: int):
         # Compare new local links to old so we dont enter an infinite loop of links!
         new_local_link_set = set()
+        found_exact_lcl_match = False
         for raw_link in raw_links:
-            try:
-                # Only pick up links with valid URL structure
-                link_url = raw_link.attrs['href']
-                # Skip blacklisted terms 
-                if any([term in link_url.lower() for term in self.blacklist_terms]):
-                    continue
-                link_url = prepend_root_to_url(link_url, base_url, subdomain=subdomain)
-            except:
+            # Only pick up links with valid URL structure
+            link_url = raw_link.attrs.get('href', False)
+            # if link_url == '/departments/special-education':
+            #     print('found')
+            if not link_url:
                 continue
+                
+            # Skip blacklisted terms 
             
+            link_url = prepend_root_to_url(link_url, base_url, subdomain=subdomain)
+
             # Extract the text shown on the webpage for the link
             link_text = try_getting_url_text(raw_link)
-            
-            if is_external_link(link_url, base_url):
+
+            # if any([term in link_url.lower() for term in self.blacklist_terms]):
+            #     continue
+
+            # We dont want to consider moving to pages that contain blacklisted terms, so treat them as 
+            # External links
+            if is_external_link(link_url, base_url) or any([term in link_url.lower() for term in self.blacklist_terms]):
                 if link_text:
+                    if 'long term' in link_text.lower():
+                        continue
+
                     relevance_score = closest_link_match(link_text, self.target_keywords)
                 else:
                     relevance_score = 0
                 # Only capture external links if they are social media links or related to BOE meetings
-                if any([site in link_url.lower() for site in self.social_media_sites]) \
+                if any([site in link_url.lower().replace('.', '') for site in self.social_media_sites]) \
                     or relevance_score > self.boe_link_similarity_cutoff:
 
                     external_link_set.add(LinkData(link_text, link_url, depth=depth))
 
             # Add link to proper set
-            elif is_local_link(link_url, base_url):
+            elif is_local_link(link_url, base_url) and not found_exact_lcl_match:
+                
+
                 if not link_text:
                     continue
-                # Score how similar the text is to keywords that can potentially house links to BOE meetings
+                if 'long term' in link_text.lower():
+
+                    continue
+                # Test code. If a local link has an exact keyword match, stop processing any local links
+                # and return the exact match as an external link (so we dont go any deeper.)
+                if any([kwd in link_text.lower() for kwd in self.target_keywords]):
+                    external_link_set.add(LinkData(link_text, link_url, depth=depth))
+                    found_exact_lcl_match = True
+                    new_local_link_set = set()
+                    continue
+                
+                # Score how similar the text is to keywords that can potentially house links relevant pages
                 link_relevance_score = closest_link_match(name=link_text, link_candidates=self.link_keywords)
                 if link_relevance_score > self.site_link_relevance_cutoff:
                     new_local_link_set.add(LinkData(link_text, link_url, depth=depth))
-
+ 
         return new_local_link_set, external_link_set
 
 
 if __name__ == '__main__':
 
-    start_url = 'https://www.bcps.org'
+    start_url = 'https://www.ncsd.k12.mo.us' #'https://www.cairodurham.org'#'https://www.nutleyschools.org'
 
     test_scraper = DistrictWebsiteScraper(url=start_url, agency_id=1000, verbose=True,
                                             link_keywords=disability_link_keywords, target_keywords=disability_keywords)
     test_scraper.find_board_meeting_and_social_media_links()
+    test_scraper.drvr.quit()
     print(test_scraper.url_data)

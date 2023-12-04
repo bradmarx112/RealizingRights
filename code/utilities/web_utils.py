@@ -24,12 +24,15 @@ gparentdir = os.path.dirname(parentdir)
 sys.path.append(parentdir)
 sys.path.append(gparentdir)
 
+from objects.scrape_lists import disability_keywords, disability_link_keywords
 from url_scraper.link_data import LinkData
 
 
 __author__ = 'bmarx'
 
 logger = logging.getLogger('selenium')
+
+MAX_THREAD_COUNT = 11
 
 
 def make_https(url) -> str:
@@ -60,14 +63,30 @@ def make_driver_utils():
     options = webdriver.ChromeOptions()
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--incognito')
-    options.add_argument('--headless')
+    options.headless = True
     options.add_argument("--disable-features=AutoplayIgnoreWebAudio")
+    options.add_argument('--mute-audio')
+    options.page_load_strategy = 'eager'
+    # Set user agent
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36")
+    
+    
+    # Adding to fix Timed out receiving message from renderer errors
+    # https://stackoverflow.com/questions/48450594/selenium-timed-out-receiving-message-from-renderer
+    # options.add_experimental_option( "prefs",{'profile.managed_default_content_settings.javascript': 2})
+    # options.add_argument("--disable-gpu")
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option('useAutomationExtension', False)
+    # options.add_argument("--disable-browser-side-navigation")
+    # options.add_argument("--no-sandbox")
+    # options.add_argument("--disable-dev-shm-usage")
     # driver = webdriver.Chrome("drivers/chromedriver.exe", options=options)
     # driver = webdriver.Chrome(service=service, options=options)
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
     driver.set_window_size(1600, 1600)
+    driver.set_page_load_timeout(50)
     actions = ActionChains(driver)
-    wait = WebDriverWait(driver, 5)
+    wait = WebDriverWait(driver, 50)
 
     return driver, actions, wait
 
@@ -199,7 +218,7 @@ def get_url_components(url: str) -> list:
     return url_comps
 
 
-def closest_link_match(name, link_candidates) -> int:
+def closest_link_match(name, link_candidates, match_function= fuzz.token_sort_ratio) -> int:
     '''
     Compares a given link text (string) to a list of target keywords, then
     returns the fuzzy match score between that text and the most similar keyword.
@@ -213,7 +232,10 @@ def closest_link_match(name, link_candidates) -> int:
     '''
     clst_url_score = 0
     for option in link_candidates:
-        similarity = fuzz.partial_token_sort_ratio(name.lower(), option.lower())
+        # similarity = match_function(name.lower(), option.lower().replace(' ', ''))
+        if option.lower() in name.lower():
+            return 100
+        similarity = match_function(option.lower(), name.lower())
         if similarity > clst_url_score:
             clst_url_score = similarity
     
@@ -257,3 +279,12 @@ def iterate_through_menus(drvr: webdriver.Chrome, actions: ActionChains) -> set:
         actions.send_keys(Keys.ESCAPE).perform()
     
     return menu_links
+
+if __name__ == '__main__':
+
+    comp_word = ['Health Services', 'Public Surplus Auctions', 'Adult Education Center', 'Family Education Center','student', 'education', 'special education for family', 'Education for special need students']
+    for word in comp_word:
+        word = word#.replace(' ', '')
+        print(word)
+        print(closest_link_match(word, disability_keywords, match_function=fuzz.token_sort_ratio))
+        print(closest_link_match(word, disability_link_keywords, match_function=fuzz.token_sort_ratio), '\n')
